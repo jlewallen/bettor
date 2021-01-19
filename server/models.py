@@ -157,6 +157,10 @@ class Bet(Base):
         "User", secondary=bet_watchers, back_populates="watched_bets"
     )
 
+    @property
+    def expired(self) -> bool:
+        return False
+
     def touch(self):
         self.activity_at = datetime.datetime.utcnow()
         assert self.group

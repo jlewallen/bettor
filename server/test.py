@@ -84,37 +84,38 @@ def main():
 
     query = """
     query {
-      groups {
-        name
-        allBets {
-          id
-          title
-          details
-          createdAt
-          expiresAt
-          state
-          author {
-            id
+        groups {
             name
-            email
-          }
-          group {
-            id
-          }
-          positions {
-            id
-            title
-            userPositions {
-              user { id name email }
-              createdAt
-              state
+            allBets {
+                id
+                title
+                details
+                createdAt
+                expiresAt
+                state
+                expired
+                author {
+                    id
+                    name
+                    email
+                }
+                group {
+                    id
+                }
+                positions {
+                    id
+                    title
+                    userPositions {
+                    user { id name email }
+                        createdAt
+                        state
+                    }
+                }
+                messages {
+                    id
+                }
             }
-          }
-          messages {
-            id
-          }
         }
-      }
     }
     """
     res = g.execute(query, context_value={"session": session, "user": jacob})
@@ -139,6 +140,29 @@ def main():
         }
         remove(payload: { groupId: 2, userId: 2 }) {
             ok
+        }
+    }
+    """
+    res = g.execute(query, context_value={"session": session, "user": jacob})
+    print(jsonpickle.dumps(res, unpicklable=False, indent=4))
+    assert res.errors is None
+
+    query = """
+    query {
+        groups(groupId: 2) {
+            id
+        }
+        betChat(betId: 4, page: 0) {
+            id
+            createdAt
+            message
+            author { id name picture }
+        }
+        groupChat(groupId: 2, page: 0) {
+            id
+            createdAt
+            message
+            author { id name picture }
         }
     }
     """

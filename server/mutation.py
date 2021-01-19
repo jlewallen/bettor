@@ -2,7 +2,6 @@ import graphene
 import datetime
 
 import utils
-
 import models
 import schema
 import storage

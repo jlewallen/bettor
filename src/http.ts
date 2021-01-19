@@ -72,7 +72,7 @@ export async function login(code: string): Promise<LoginResponse> {
 }
 
 export async function graphql<T>(query: string): Promise<T> {
-    const res = await http<T>({
+    const res = await http<{ data: T }>({
         url: "/v1/graphql",
         headers: getAuthHeaders(),
         method: "POST",
@@ -81,19 +81,6 @@ export async function graphql<T>(query: string): Promise<T> {
         },
     });
     return res.data;
-}
-
-export interface FeedEntry {
-    id: string;
-    created: number;
-}
-
-export interface FeedResponse {
-    feed: FeedEntry[];
-}
-
-export async function queryFeed(groupId: string): Promise<FeedResponse> {
-    return await graphql<FeedResponse>("{ groups { id name } }");
 }
 
 export interface Group {
@@ -107,5 +94,90 @@ export interface GroupsResponse {
 }
 
 export async function queryGroups(): Promise<GroupsResponse> {
-    return await graphql<GroupsResponse>("{ groups { id name createdAt activityAt picture } }");
+    return await graphql<GroupsResponse>(`
+        query {
+            groups {
+                id
+                owner {
+                    id
+                    name
+                    picture
+                }
+                name
+                activityAt
+                picture
+                allBets {
+                    id
+                    title
+                    details
+                    createdAt
+                    expiresAt
+                    activityAt
+                    state
+                    author {
+                        id
+                        name
+                        email
+                    }
+                    positions {
+                        title
+                        userPositions {
+                            user {
+                                id
+                                name
+                                email
+                            }
+                            createdAt
+                            state
+                        }
+                    }
+                }
+            }
+        }
+    `);
+}
+
+export interface Bet {
+    id: string;
+    title: string;
+    details: string;
+    activityAt: string;
+}
+
+export interface ChatMessage {
+    id: number;
+    createdAt: string;
+    message: string;
+}
+
+export interface ChatResponse {
+    messages: ChatMessage[];
+}
+
+export async function groupChat(groupId: number, page: number): Promise<ChatResponse> {
+    const response = await graphql<{ groupChat: ChatMessage[] }>(`
+        query {
+			groupChat(groupId: ${groupId}, page: ${page}) {
+				id
+				createdAt
+				message
+				author { id name picture }
+			}
+        }
+	`);
+    return { messages: response.groupChat };
+}
+
+export async function betChat(betId: number, page: number): Promise<ChatResponse> {
+    const response = await graphql<{ betChat: ChatMessage[] }>(`
+        query {
+			betChat(betId: ${betId}, page: ${page}) {
+				id
+				createdAt
+				message
+				author { id name picture }
+			}
+        }
+    `);
+    return { messages: response.betChat };
 }

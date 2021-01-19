@@ -3,28 +3,39 @@ import VueRouter, { RouteConfig } from "vue-router";
 import Home from "../views/Home.vue";
 import Login from "../views/Login.vue";
 import Profile from "../views/Profile.vue";
+import Group from "../views/Group.vue";
 
 Vue.use(VueRouter);
 
 const routes: Array<RouteConfig> = [
     {
         path: "/",
-        name: "Home",
+        name: "home",
         component: Home,
     },
     {
         path: "/login",
-        name: "Login",
+        name: "login",
         component: Login,
     },
     {
         path: "/callback",
-        name: "LoginComplete",
+        name: "loginComplete",
         component: Login,
     },
     {
+        path: "/groups/:id",
+        name: "group",
+        component: Group,
+        props: (route) => {
+            return {
+                id: Number(route.params.id),
+            };
+        },
+    },
+    {
         path: "/profile",
-        name: "Profile",
+        name: "profile",
         component: Profile,
     },
 ];
