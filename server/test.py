@@ -172,6 +172,12 @@ def main():
         cancelBet(payload: { betId: 4 }) {
             ok
         }
+        invite(payload: { groupId: 2, email: "stephen@example.com" }) {
+            ok
+        }
+        remove(payload: { groupId: 2, userId: 2 }) {
+            ok
+        }
     }
     """
     res = g.execute(query, context_value={"session": session, "user": jacob})

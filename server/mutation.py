@@ -196,6 +196,60 @@ class CancelBet(graphene.Mutation):
         return CancelBet(ok=True)
 
 
+class InviteAttributes:
+    group_id = graphene.Int(required=True)
+    email = graphene.String(required=True)
+
+
+class InvitePayload(graphene.InputObjectType, InviteAttributes):
+    pass
+
+
+class Invite(graphene.Mutation):
+    ok = graphene.Boolean()
+
+    class Arguments:
+        payload = InvitePayload(required=True)
+
+    @staticmethod
+    def mutate(self, info, payload):
+        user = info.context["user"]
+        inviting = (
+            session.query(models.User)
+            .filter(models.User.email == payload.email)
+            .first()
+        )
+        group = session.query(models.Group).get(payload.group_id)
+        group.invite(inviting)
+        session.commit()
+        return CancelBet(ok=True)
+
+
+class RemoveAttributes:
+    group_id = graphene.Int(required=True)
+    user_id = graphene.Int(required=True)
+
+
+class RemovePayload(graphene.InputObjectType, RemoveAttributes):
+    pass
+
+
+class Remove(graphene.Mutation):
+    ok = graphene.Boolean()
+
+    class Arguments:
+        payload = RemovePayload(required=True)
+
+    @staticmethod
+    def mutate(self, info, payload):
+        user = info.context["user"]
+        removing = session.query(models.User).get(payload.user_id)
+        group = session.query(models.Group).get(payload.group_id)
+        group.remove(removing)
+        session.commit()
+        return CancelBet(ok=True)
+
+
 class Mutation(graphene.ObjectType):
     createGroup = CreateGroup.Field()
     createBet = CreateBet.Field()
@@ -205,3 +259,5 @@ class Mutation(graphene.ObjectType):
     sayGroupChat = SayGroupChat.Field()
     sayBetChat = SayBetChat.Field()
     cancelBet = CancelBet.Field()
+    invite = Invite.Field()
+    remove = Remove.Field()

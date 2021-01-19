@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { authenticated, queryGroups } from "@/http";
+import { authenticated, graphql, queryGroups } from "@/http";
 
 export default Vue.extend({
     name: "Home",
@@ -17,8 +17,16 @@ export default Vue.extend({
         }
 
         const groups = await queryGroups();
-
-        console.log(groups);
+        console.log("groups", groups);
+        if (groups.groups.length == 0) {
+            await graphql<never>(`
+                mutation {
+                    createGroup(payload: { name: "New group" }) {
+                        ok
+                    }
+                }
+            `);
+        }
     },
 });
 </script>

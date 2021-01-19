@@ -71,6 +71,18 @@ export async function login(code: string): Promise<LoginResponse> {
     return response;
 }
 
+export async function graphql<T>(query: string): Promise<T> {
+    const res = await http<T>({
+        url: "/v1/graphql",
+        headers: getAuthHeaders(),
+        method: "POST",
+        data: {
+            query: query,
+        },
+    });
+    return res.data;
+}
+
 export interface FeedEntry {
     id: string;
     created: number;
@@ -81,14 +93,7 @@ export interface FeedResponse {
 }
 
 export async function queryFeed(groupId: string): Promise<FeedResponse> {
-    return await http<FeedResponse>({
-        url: "/v1/graphql",
-        headers: getAuthHeaders(),
-        method: "POST",
-        data: {
-            query: "{ myself { id name email picture } groups { id } }",
-        },
-    });
+    return await graphql<FeedResponse>("{ groups { id name } }");
 }
 
 export interface Group {
@@ -102,12 +107,5 @@ export interface GroupsResponse {
 }
 
 export async function queryGroups(): Promise<GroupsResponse> {
-    return await http<GroupsResponse>({
-        url: "/v1/graphql",
-        headers: getAuthHeaders(),
-        method: "POST",
-        data: {
-            query: "{ myself { id name email picture } groups { id } }",
-        },
-    });
+    return await graphql<GroupsResponse>("{ groups { id name createdAt activityAt picture } }");
 }

@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import List, Any, Union
 from sqlalchemy import Column, Integer, String, Table, Text, ForeignKey, DateTime, Enum
 from sqlalchemy.orm import relationship
 
@@ -24,7 +24,7 @@ class User(Base):
     name = Column(String, nullable=False)
     email = Column(String, nullable=False)
     picture = Column(String)
-    created = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     activity_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     deleted_at = Column(DateTime, nullable=True)
 
@@ -51,7 +51,7 @@ class Group(Base):
     name = Column(String, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     picture = Column(String)
-    created = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     activity_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     deleted_at = Column(DateTime, nullable=True)
 
@@ -64,6 +64,17 @@ class Group(Base):
 
     def touch(self):
         self.activity_at = datetime.datetime.utcnow()
+
+    def invite(self, user: User) -> Union[User, None]:
+        if user in self.members:
+            return None
+        self.members.append(user)
+        return user
+
+    def remove(self, user: User):
+        if user in self.members:
+            self.members.remove(user)
+        return user
 
     def __repr__(self):
         return "<Group(id='%s', name='%s')>" % (
