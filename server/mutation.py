@@ -137,9 +137,9 @@ class SayGroupChat(graphene.Mutation):
     @staticmethod
     def mutate(self, info, payload):
         user = info.context["user"]
-        message = models.GroupChat(
-            group_id=payload.group_id, message=payload.message, author=user
-        )
+        group = session.query(models.Group).get(payload.group_id)
+        group.touch()
+        message = models.GroupChat(group=group, message=payload.message, author=user)
         session.add(message)
         session.commit()
         return SayGroupChat(message=message, ok=True)
@@ -164,9 +164,9 @@ class SayBetChat(graphene.Mutation):
     @staticmethod
     def mutate(self, info, payload):
         user = info.context["user"]
-        message = models.BetChat(
-            bet_id=payload.bet_id, message=payload.message, author=user
-        )
+        bet = session.query(models.Bet).get(payload.bet_id)
+        bet.touch()
+        message = models.BetChat(bet=bet, message=payload.message, author=user)
         session.add(message)
         session.commit()
         return SayBetChat(message=message, ok=True)
@@ -191,6 +191,7 @@ class CancelBet(graphene.Mutation):
         user = info.context["user"]
         bet = session.query(models.Bet).get(payload.bet_id)
         bet.cancel(user)
+        bet.touch()
         session.commit()
         return CancelBet(ok=True)
 

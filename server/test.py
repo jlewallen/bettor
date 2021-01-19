@@ -28,27 +28,29 @@ def main():
 
     standard_expiration = datetime.timedelta(minutes=60)
     simple = models.Bet.coin_toss(
-        author=jacob, expires_at=datetime.datetime.utcnow() + standard_expiration
+        group=group,
+        author=jacob,
+        expires_at=datetime.datetime.utcnow() + standard_expiration,
     )
     simple.take(jacob, position="heads")
     simple.take(stephen, position="tails")
 
     jimmy_example = models.Bet.arbitrary(
         title="Derrick Henry over 35 receptions",
+        group=group,
         author=stephen,
         expires_at=datetime.datetime.utcnow() + standard_expiration,
     )
     jimmy_example.take(jimmy)
 
     multiple_takers = models.Bet.arbitrary(
+        group=group,
         title="Daniel Jones has more fantasy points than Tom Brady at season end.",
         author=stephen,
         expires_at=datetime.datetime.utcnow() + standard_expiration,
     )
     multiple_takers.take(derek)
     multiple_takers.take(scott)
-
-    group.all_bets = [simple, jimmy_example, multiple_takers]
 
     session.add(group)
     session.commit()

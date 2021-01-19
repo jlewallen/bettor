@@ -24,10 +24,18 @@ class User(Base):
     name = Column(String, nullable=False)
     email = Column(String, nullable=False)
     picture = Column(String)
+    created = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    activity_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    deleted_at = Column(DateTime, nullable=True)
 
     created_groups = relationship("Group", back_populates="owner")
     groups = relationship("Group", secondary=group_members, back_populates="members")
     authored_bets = relationship("Bet", back_populates="author")
+
+    __mapper_args__ = {"order_by": activity_at.desc()}
+
+    def touch(self):
+        self.activity_at = datetime.datetime.utcnow()
 
     def __repr__(self):
         return "<User(id='%s', name='%s')>" % (
@@ -43,12 +51,19 @@ class Group(Base):
     name = Column(String, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     picture = Column(String)
+    created = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    activity_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     deleted_at = Column(DateTime, nullable=True)
 
     owner = relationship("User", back_populates="created_groups")
     members = relationship("User", secondary=group_members, back_populates="groups")
     all_bets = relationship("Bet", back_populates="group")
     messages = relationship("GroupChat", back_populates="group")
+
+    __mapper_args__ = {"order_by": activity_at.desc()}
+
+    def touch(self):
+        self.activity_at = datetime.datetime.utcnow()
 
     def __repr__(self):
         return "<Group(id='%s', name='%s')>" % (
@@ -60,6 +75,7 @@ class Group(Base):
 class BetState(enum.Enum):
     OPEN = "OPEN"
     EXPIRED = "EXPIRED"
+    CANCELLED = "CANCELLED"
     CLAIMED = "CLAIMED"
     DISPUTED = "DISPUTED"
     PAID = "PAID"
@@ -77,6 +93,8 @@ class GroupChat(Base):
     group = relationship("Group", back_populates="messages")
     author = relationship("User")
 
+    __mapper_args__ = {"order_by": created_at.desc()}
+
 
 class BetChat(Base):
     __tablename__ = "bet_chat"
@@ -90,6 +108,8 @@ class BetChat(Base):
     bet = relationship("Bet", back_populates="messages")
     author = relationship("User")
 
+    __mapper_args__ = {"order_by": created_at.desc()}
+
 
 class Bet(Base):
     __tablename__ = "bets"
@@ -100,6 +120,7 @@ class Bet(Base):
     title = Column(String, nullable=False)
     details = Column(String, nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    activity_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     expires_at = Column(DateTime, nullable=False)
     deleted_at = Column(DateTime, nullable=True)
     state = Column(Enum(BetState), nullable=False, default=BetState.OPEN)
@@ -108,6 +129,12 @@ class Bet(Base):
     group = relationship("Group", back_populates="all_bets")
     positions = relationship("Position", back_populates="bet")
     messages = relationship("BetChat", back_populates="bet")
+
+    def touch(self):
+        self.activity_at = datetime.datetime.utcnow()
+        assert self.group
+        if self.group:
+            self.group.touch()
 
     @classmethod
     def arbitrary(
@@ -153,14 +180,17 @@ class Bet(Base):
             if position:
                 if p.title.lower() == position.lower():
                     if p.take(user):
-                        pass
+                        self.touch()
             else:
                 if p.is_open():
                     if p.take(user):
-                        pass
+                        self.touch()
 
     def cancel(self, user: User):
         self.position_by_user(user).cancel(user)
+        if self.author == user:
+            self.state = BetState.CANCELLED
+        self.touch()
 
     def position_by_user(self, user: User) -> "UserPosition":
         found = [up for up in self.positions if up.has_user(user)]
