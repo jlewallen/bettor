@@ -71,8 +71,9 @@ class CreateExamples(graphene.Mutation):
     ok = graphene.Boolean()
 
     @staticmethod
-    def mutate(self, info, payload):
+    def mutate(self, info):
         user = info.context["user"]
+        session.add(models.create_examples())
         session.commit()
         return CreateExamples(ok=True)
 

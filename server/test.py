@@ -12,48 +12,11 @@ import gql
 
 def main():
     session = storage.create()
-
-    jacob = models.User(sub="", name="Jacob", email="jacob@example.com")
-    stephen = models.User(sub="", name="Stephen", email="stephen@example.com")
-    jimmy = models.User(sub="", name="Jimmy", email="jimmy@example.com")
-    derek = models.User(sub="", name="Derek", email="derek@example.com")
-    zack = models.User(sub="", name="Zack", email="zack@example.com")
-    scott = models.User(sub="", name="Scott", email="scott@example.com")
-
-    group = models.Group(
-        name="Small Group",
-        owner=jacob,
-        members=[jacob, stephen, jimmy, derek, zack, scott],
-    )
-
-    standard_expiration = datetime.timedelta(minutes=60)
-    simple = models.Bet.coin_toss(
-        group=group,
-        author=jacob,
-        expires_at=datetime.datetime.utcnow() + standard_expiration,
-    )
-    simple.take(jacob, position="heads")
-    simple.take(stephen, position="tails")
-
-    jimmy_example = models.Bet.arbitrary(
-        title="Derrick Henry over 35 receptions",
-        group=group,
-        author=stephen,
-        expires_at=datetime.datetime.utcnow() + standard_expiration,
-    )
-    jimmy_example.take(jimmy)
-
-    multiple_takers = models.Bet.arbitrary(
-        group=group,
-        title="Daniel Jones has more fantasy points than Tom Brady at season end.",
-        author=stephen,
-        expires_at=datetime.datetime.utcnow() + standard_expiration,
-    )
-    multiple_takers.take(derek)
-    multiple_takers.take(scott)
-
-    session.add(group)
+    session.add(models.create_examples())
     session.commit()
+
+    jacob = session.query(models.User).get(1)
+    stephen = session.query(models.User).get(2)
 
     g = gql.create()
 
@@ -66,7 +29,6 @@ def main():
     }
     """
 
-    print(jacob)
     res = g.execute(query, context_value={"session": session, "user": jacob})
     print(jsonpickle.dumps(res, unpicklable=False, indent=4))
     assert res.errors is None

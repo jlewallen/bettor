@@ -21,7 +21,7 @@ export default Vue.extend({
         if (groups.groups.length == 0) {
             await graphql<never>(`
                 mutation {
-                    createGroup(payload: { name: "New group" }) {
+                    createExamples {
                         ok
                     }
                 }

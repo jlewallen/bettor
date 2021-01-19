@@ -16,6 +16,15 @@ group_members = Table(
 )
 
 
+bet_watchers = Table(
+    "bet_watchers",
+    Base.metadata,
+    Column("bet_id", ForeignKey("bets.id"), primary_key=True),
+    Column("user_id", ForeignKey("users.id"), primary_key=True),
+    Column("watched", DateTime, nullable=False, default=datetime.datetime.utcnow),
+)
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -31,6 +40,10 @@ class User(Base):
     created_groups = relationship("Group", back_populates="owner")
     groups = relationship("Group", secondary=group_members, back_populates="members")
     authored_bets = relationship("Bet", back_populates="author")
+
+    watched_bets = relationship(
+        "Bet", secondary=bet_watchers, back_populates="watchers"
+    )
 
     __mapper_args__ = {"order_by": activity_at.desc()}
 
@@ -140,6 +153,9 @@ class Bet(Base):
     group = relationship("Group", back_populates="all_bets")
     positions = relationship("Position", back_populates="bet")
     messages = relationship("BetChat", back_populates="bet")
+    watchers = relationship(
+        "User", secondary=bet_watchers, back_populates="watched_bets"
+    )
 
     def touch(self):
         self.activity_at = datetime.datetime.utcnow()
@@ -192,10 +208,12 @@ class Bet(Base):
                 if p.title.lower() == position.lower():
                     if p.take(user):
                         self.touch()
+                        self.watchers.append(user)
             else:
                 if p.is_open():
                     if p.take(user):
                         self.touch()
+                        self.watchers.append(user)
 
     def cancel(self, user: User):
         self.position_by_user(user).cancel(user)
@@ -294,3 +312,46 @@ class UserPosition(Base):
 
 def flatten(l):
     return [item for sl in l for item in sl]
+
+
+def create_examples():
+    jacob = User(sub="", name="Jacob", email="jlewalle@gmail.com")
+    stephen = User(sub="", name="Stephen", email="stephen@example.com")
+    jimmy = User(sub="", name="Jimmy", email="jimmy@example.com")
+    derek = User(sub="", name="Derek", email="derek@example.com")
+    zack = User(sub="", name="Zack", email="zack@example.com")
+    scott = User(sub="", name="Scott", email="scott@example.com")
+
+    group = Group(
+        name="Small Group",
+        owner=jacob,
+        members=[jacob, stephen, jimmy, derek, zack, scott],
+    )
+
+    standard_expiration = datetime.timedelta(minutes=60)
+    simple = Bet.coin_toss(
+        group=group,
+        author=jacob,
+        expires_at=datetime.datetime.utcnow() + standard_expiration,
+    )
+    simple.take(jacob, position="heads")
+    simple.take(stephen, position="tails")
+
+    jimmy_example = Bet.arbitrary(
+        title="Derrick Henry over 35 receptions",
+        group=group,
+        author=stephen,
+        expires_at=datetime.datetime.utcnow() + standard_expiration,
+    )
+    jimmy_example.take(jimmy)
+
+    multiple_takers = Bet.arbitrary(
+        group=group,
+        title="Daniel Jones has more fantasy points than Tom Brady at season end.",
+        author=stephen,
+        expires_at=datetime.datetime.utcnow() + standard_expiration,
+    )
+    multiple_takers.take(derek)
+    multiple_takers.take(scott)
+
+    return group

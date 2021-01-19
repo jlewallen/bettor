@@ -57,10 +57,14 @@ class Query(graphene.ObjectType):
         user = info.context["user"]
         query = Group.get_query(info)  # SQLAlchemy query
         return query.filter(
-            models.Group.members.any(models.User.id.in_([user.id]))
+            models.Group.members.any(models.User.id.in_([user.id])),
+            models.Group.deleted_at == None,
         ).all()
 
     def resolve_bets(self, info):
         user = info.context["user"]
         query = Bet.get_query(info)  # SQLAlchemy query
-        return query.all()
+        return query.filter(
+            models.Bet.watchers.any(models.User.id.in_([user.id])),
+            models.Bet.deleted_at == None,
+        ).all()
