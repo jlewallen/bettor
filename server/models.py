@@ -69,22 +69,26 @@ class GroupChat(Base):
     __tablename__ = "group_chat"
 
     id = Column(Integer, primary_key=True)
+    group_id = Column(Integer, ForeignKey("groups.id"), nullable=False)
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    message = Column(String, nullable=False)
 
-    group_id = Column(Integer, ForeignKey("groups.id"), nullable=False)
     group = relationship("Group", back_populates="messages")
+    author = relationship("User")
 
 
 class BetChat(Base):
     __tablename__ = "bet_chat"
 
     id = Column(Integer, primary_key=True)
+    bet_id = Column(Integer, ForeignKey("bets.id"), nullable=False)
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    message = Column(String, nullable=False)
 
-    bet_id = Column(Integer, ForeignKey("bets.id"), nullable=False)
     bet = relationship("Bet", back_populates="messages")
+    author = relationship("User")
 
 
 class Bet(Base):
@@ -155,6 +159,15 @@ class Bet(Base):
                     if p.take(user):
                         pass
 
+    def cancel(self, user: User):
+        self.position_by_user(user).cancel(user)
+
+    def position_by_user(self, user: User) -> "UserPosition":
+        found = [up for up in self.positions if up.has_user(user)]
+        if len(found):
+            return found[0]
+        raise Exception("no position for user")
+
     def users_with_positions(self) -> List[User]:
         return flatten([p.valid_users() for p in self.positions])
 
@@ -184,8 +197,19 @@ class Position(Base):
     def valid_users(self) -> List[User]:
         return [up.user for up in self.user_positions if up.is_valid()]
 
+    def has_user(self, user: User) -> bool:
+        return user in self.valid_users()
+
     def take(self, user: User) -> bool:
         self.user_positions.append(UserPosition(position=self, user=user))
+        return True
+
+    def get_user_position(self, user: User) -> "UserPosition":
+        return [up for up in self.user_positions if up.user_id == user.id][0]
+
+    def cancel(self, user: User) -> bool:
+        user_position = self.get_user_position(user)
+        user_position.cancel()
         return True
 
     def __repr__(self):
@@ -207,7 +231,7 @@ class UserPosition(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     position_id = Column(Integer, ForeignKey("positions.id"))
-    created = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     state = Column(Enum(PositionState), nullable=False, default=PositionState.TAKEN)
 
     user = relationship("User")
@@ -215,6 +239,10 @@ class UserPosition(Base):
 
     def is_valid(self) -> bool:
         return self.state != PositionState.CANCELLED
+
+    def cancel(self):
+        assert self.state == PositionState.TAKEN
+        self.state = PositionState.CANCELLED
 
     def __repr__(self):
         return "<UserPosition(id='%s', title='%s')>" % (

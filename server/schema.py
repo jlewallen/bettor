@@ -35,14 +35,14 @@ class UserPosition(ActiveSQLAlchemyObjectType):
         model = models.UserPosition
 
 
-class BetChat(ActiveSQLAlchemyObjectType):
-    class Meta:
-        model = models.BetChat
-
-
 class GroupChat(ActiveSQLAlchemyObjectType):
     class Meta:
         model = models.GroupChat
+
+
+class BetChat(ActiveSQLAlchemyObjectType):
+    class Meta:
+        model = models.BetChat
 
 
 class Query(graphene.ObjectType):

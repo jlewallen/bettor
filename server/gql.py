@@ -14,7 +14,7 @@ def create():
             schema.Bet,
             schema.Position,
             schema.UserPosition,
-            schema.BetChat,
             schema.GroupChat,
+            schema.BetChat,
         ],
     )

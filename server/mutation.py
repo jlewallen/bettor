@@ -64,9 +64,143 @@ class CreateBet(graphene.Mutation):
             expires_at=datetime.datetime.utcnow() + expires_in,
         )
         session.commit()
-        return CreateBet(bet=bet, ok=False)
+        return CreateBet(bet=bet, ok=True)
+
+
+class CreateExamples(graphene.Mutation):
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(self, info, payload):
+        user = info.context["user"]
+        session.commit()
+        return CreateExamples(ok=True)
+
+
+class PositionAttributes:
+    bet_id = graphene.Int(required=True)
+    position = graphene.String()
+
+
+class PositionPayload(graphene.InputObjectType, PositionAttributes):
+    pass
+
+
+class TakePosition(graphene.Mutation):
+    bet = graphene.Field(schema.Bet)
+    ok = graphene.Boolean()
+
+    class Arguments:
+        payload = PositionPayload(required=True)
+
+    @staticmethod
+    def mutate(self, info, payload):
+        user = info.context["user"]
+        bet = session.query(models.Bet).get(payload.bet_id)
+        bet.take(user, payload.position)
+        session.commit()
+        return TakePosition(bet=bet, ok=True)
+
+
+class CancelPosition(graphene.Mutation):
+    bet = graphene.Field(schema.Bet)
+    ok = graphene.Boolean()
+
+    class Arguments:
+        payload = PositionPayload(required=True)
+
+    @staticmethod
+    def mutate(self, info, payload):
+        user = info.context["user"]
+        bet = session.query(models.Bet).get(payload.bet_id)
+        bet.cancel(user)
+        session.commit()
+        return CancelPosition(bet=bet, ok=True)
+
+
+class GroupChatAttributes:
+    group_id = graphene.Int(required=True)
+    message = graphene.String()
+
+
+class GroupChatPayload(graphene.InputObjectType, GroupChatAttributes):
+    pass
+
+
+class SayGroupChat(graphene.Mutation):
+    message = graphene.Field(schema.GroupChat)
+    ok = graphene.Boolean()
+
+    class Arguments:
+        payload = GroupChatPayload(required=True)
+
+    @staticmethod
+    def mutate(self, info, payload):
+        user = info.context["user"]
+        message = models.GroupChat(
+            group_id=payload.group_id, message=payload.message, author=user
+        )
+        session.add(message)
+        session.commit()
+        return SayGroupChat(message=message, ok=True)
+
+
+class BetChatAttributes:
+    bet_id = graphene.Int(required=True)
+    message = graphene.String()
+
+
+class BetChatPayload(graphene.InputObjectType, BetChatAttributes):
+    pass
+
+
+class SayBetChat(graphene.Mutation):
+    message = graphene.Field(schema.BetChat)
+    ok = graphene.Boolean()
+
+    class Arguments:
+        payload = BetChatPayload(required=True)
+
+    @staticmethod
+    def mutate(self, info, payload):
+        user = info.context["user"]
+        message = models.BetChat(
+            bet_id=payload.bet_id, message=payload.message, author=user
+        )
+        session.add(message)
+        session.commit()
+        return SayBetChat(message=message, ok=True)
+
+
+class CancelBetAttributes:
+    bet_id = graphene.Int(required=True)
+
+
+class CancelBetPayload(graphene.InputObjectType, CancelBetAttributes):
+    pass
+
+
+class CancelBet(graphene.Mutation):
+    ok = graphene.Boolean()
+
+    class Arguments:
+        payload = CancelBetPayload(required=True)
+
+    @staticmethod
+    def mutate(self, info, payload):
+        user = info.context["user"]
+        bet = session.query(models.Bet).get(payload.bet_id)
+        bet.cancel(user)
+        session.commit()
+        return CancelBet(ok=True)
 
 
 class Mutation(graphene.ObjectType):
     createGroup = CreateGroup.Field()
     createBet = CreateBet.Field()
+    createExamples = CreateExamples.Field()
+    takePosition = TakePosition.Field()
+    cancelPosition = CancelPosition.Field()
+    sayGroupChat = SayGroupChat.Field()
+    sayBetChat = SayBetChat.Field()
+    cancelBet = CancelBet.Field()

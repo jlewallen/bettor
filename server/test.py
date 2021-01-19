@@ -82,6 +82,22 @@ def main():
     assert res.errors is None
 
     query = """
+    mutation {
+        takePosition(payload: { betId: 4, position: "Takers" }) {
+            bet { id }
+            ok
+        }
+        cancelPosition(payload: { betId: 4, position: "Takers" }) {
+            bet { id }
+            ok
+        }
+    }
+    """
+    res = g.execute(query, context_value={"session": session, "user": stephen})
+    print(jsonpickle.dumps(res, unpicklable=False, indent=4))
+    assert res.errors is None
+
+    query = """
     query {
         myself {
             id
@@ -126,6 +142,7 @@ def main():
             title
             userPositions {
               user { id name email }
+              createdAt
               state
             }
           }
@@ -134,6 +151,25 @@ def main():
           }
         }
       }
+    }
+    """
+    res = g.execute(query, context_value={"session": session, "user": jacob})
+    print(jsonpickle.dumps(res, unpicklable=False, indent=4))
+    assert res.errors is None
+
+    query = """
+    mutation {
+        sayBetChat(payload: { betId: 4, message: "Hey" }) {
+            message { id }
+            ok
+        }
+        sayGroupChat(payload: { groupId: 2, message: "Takers" }) {
+            message { id }
+            ok
+        }
+        cancelBet(payload: { betId: 4 }) {
+            ok
+        }
     }
     """
     res = g.execute(query, context_value={"session": session, "user": jacob})
