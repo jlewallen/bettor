@@ -26,3 +26,7 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+/.env
+/env
+__pycache__
