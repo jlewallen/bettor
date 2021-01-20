@@ -1,7 +1,7 @@
 <template>
     <div class="entry chat" v-on:click="raiseTap" v-bind:class="{ me: myself() }">
-        <UserPhoto :user="entry.message.author" />
-        <div>
+        <UserPhoto :user="entry.message.author" class="feed-photo" />
+        <div class="feed-body">
             <p class="message">
                 {{ entry.message.message }}
             </p>

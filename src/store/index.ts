@@ -5,7 +5,7 @@ import { createLogger } from "vuex";
 
 import { authenticated, Group, Bet, LoginPerson, getApi } from "../http";
 
-import { QueriedGroupFieldsFragment, GroupChatMessageFieldsFragment, QueriedBetFieldsFragment } from "../http";
+import { ListedGroupFieldsFragment, QueriedGroupFieldsFragment, GroupChatMessageFieldsFragment, QueriedBetFieldsFragment } from "../http";
 
 export { authenticated, Group, Bet, LoginPerson };
 
@@ -15,6 +15,7 @@ export enum MutationTypes {
     REFRESH_SELF = "REFRESH_SELF",
     REFRESH_USER = "REFRESH_USER",
     REFRESH_GROUPS = "REFRESH_GROUPS",
+    REFRESH_GROUP = "REFRESH_GROUP",
     REFRESH_BETS = "REFRESH_BETS",
     REFRESH_GROUP_CHAT = "REFRESH_GROUP_CHAT",
     REFRESH_BET_CHAT = "REFRESH_BET_CHAT",
@@ -106,7 +107,7 @@ export class Feed {
 export class State {
     constructor(
         public readonly self: LoginPerson | null = null,
-        public readonly groups: { [id: number]: Group } = {},
+        public readonly groups: { [id: number]: ListedGroupFieldsFragment } = {},
         public readonly bets: { [id: number]: Bet } = {},
         public readonly feeds: { [id: number]: Feed } = {}
     ) {}
@@ -118,18 +119,30 @@ export default new Vuex.Store({
     plugins: [createLogger()],
     state: new State(),
     mutations: {
-        [MutationTypes.REFRESH_SELF]: (state: State, self: LoginPerson) => {
+        [MutationTypes.REFRESH_SELF]: (state: State, self: LoginPerson): void => {
             Vue.set(state, "self", self);
         },
-        [MutationTypes.REFRESH_GROUPS]: (state: State, groups: Group[]) => {
+        [MutationTypes.REFRESH_GROUP]: (state: State, group: QueriedGroupFieldsFragment): void => {
+            if (group.allBets) {
+                for (const bet of group.allBets) {
+                    if (bet) {
+                        Vue.set(state.bets, bet.id, bet);
+                    }
+                }
+            }
+        },
+        [MutationTypes.REFRESH_GROUPS]: (state: State, groups: ListedGroupFieldsFragment[]): void => {
             const incoming = _.keyBy(groups, (g) => g.id);
             const newGroups = { ...state.groups, ...incoming };
             Vue.set(state, "groups", newGroups);
         },
-        [MutationTypes.REFRESH_FEED]: (state: State, feed: Feed) => {
+        [MutationTypes.REFRESH_FEED]: (state: State, feed: Feed): void => {
             Vue.set(state.feeds, feed.id, feed);
         },
-        [MutationTypes.APPEND_GROUP_FEED_CHAT]: (state: State, payload: { groupId: number; message: GroupChatMessageFieldsFragment }) => {
+        [MutationTypes.APPEND_GROUP_FEED_CHAT]: (
+            state: State,
+            payload: { groupId: number; message: GroupChatMessageFieldsFragment }
+        ): void => {
             state.feeds[payload.groupId] = state.feeds[payload.groupId].appendChat(payload.message);
         },
     },
@@ -160,6 +173,7 @@ export default new Vuex.Store({
             if (groups && groups.groups && groups.groups.length == 1 && chats && chats.groupChat) {
                 const group = groups.groups[0];
                 const feed = new Feed(group, chats.groupChat);
+                commit(MutationTypes.REFRESH_GROUP, group);
                 commit(MutationTypes.REFRESH_FEED, feed);
             }
         },
@@ -171,11 +185,8 @@ export default new Vuex.Store({
         },
     },
     getters: {
-        activeGroups(state: State): Group[] {
+        activeGroups(state: State): ListedGroupFieldsFragment[] {
             return _.values(state.groups);
-        },
-        groupFeeds(state: State): { [id: number]: Feed } {
-            return {};
         },
     },
     modules: {},

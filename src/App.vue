@@ -55,6 +55,7 @@ export default Vue.extend({
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
+    background-color: #efefef;
     color: #2c3e50;
 }
 
@@ -74,5 +75,10 @@ export default Vue.extend({
 .md-app {
     min-height: 500px;
     border: 1px solid rgba(#000, 0.12);
+}
+
+body,
+.md-app .md-content.md-app-content {
+    background-color: #efefef;
 }
 </style>

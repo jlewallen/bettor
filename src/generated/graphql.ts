@@ -320,6 +320,11 @@ export type RemovePayload = {
   userId: Scalars['Int'];
 };
 
+export type GroupFieldsFragment = (
+  { __typename?: 'Group' }
+  & Pick<Group, 'id' | 'name' | 'activityAt' | 'picture'>
+);
+
 export type LoadGroupQueryVariables = Exact<{
   groupId?: Maybe<Scalars['Int']>;
 }>;
@@ -331,11 +336,6 @@ export type LoadGroupQuery = (
     { __typename?: 'Group' }
     & GroupFieldsFragment
   )>> }
-);
-
-export type GroupFieldsFragment = (
-  { __typename?: 'Group' }
-  & Pick<Group, 'id' | 'name'>
 );
 
 export type CreateExamplesMutationVariables = Exact<{ [key: string]: never; }>;
@@ -354,6 +354,15 @@ export type UserRefFragment = (
   & Pick<User, 'id' | 'name' | 'picture'>
 );
 
+export type ListedGroupFieldsFragment = (
+  { __typename?: 'Group' }
+  & Pick<Group, 'id' | 'name' | 'activityAt' | 'picture'>
+  & { owner?: Maybe<(
+    { __typename?: 'User' }
+    & UserRefFragment
+  )> }
+);
+
 export type QueryGroupsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -361,11 +370,7 @@ export type QueryGroupsQuery = (
   { __typename?: 'Query' }
   & { groups?: Maybe<Array<(
     { __typename?: 'Group' }
-    & Pick<Group, 'id' | 'name' | 'activityAt' | 'picture'>
-    & { owner?: Maybe<(
-      { __typename?: 'User' }
-      & UserRefFragment
-    )> }
+    & ListedGroupFieldsFragment
   )>> }
 );
 
@@ -514,6 +519,8 @@ export const GroupFieldsFragmentDoc = gql`
     fragment GroupFields on Group {
   id
   name
+  activityAt
+  picture
 }
     `;
 export const UserRefFragmentDoc = gql`
@@ -523,6 +530,17 @@ export const UserRefFragmentDoc = gql`
   picture
 }
     `;
+export const ListedGroupFieldsFragmentDoc = gql`
+    fragment ListedGroupFields on Group {
+  id
+  owner {
+    ...UserRef
+  }
+  name
+  activityAt
+  picture
+}
+    ${UserRefFragmentDoc}`;
 export const QueriedBetFieldsFragmentDoc = gql`
     fragment QueriedBetFields on Bet {
   id
@@ -602,16 +620,10 @@ export const CreateExamplesDocument = gql`
 export const QueryGroupsDocument = gql`
     query queryGroups {
   groups {
-    id
-    owner {
-      ...UserRef
-    }
-    name
-    activityAt
-    picture
+    ...ListedGroupFields
   }
 }
-    ${UserRefFragmentDoc}`;
+    ${ListedGroupFieldsFragmentDoc}`;
 export const QueryGroupDocument = gql`
     query queryGroup($groupId: Int!) {
   groups(groupId: $groupId) {

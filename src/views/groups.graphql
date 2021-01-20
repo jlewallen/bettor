@@ -1,12 +1,14 @@
+fragment GroupFields on Group {
+  id
+  name
+  activityAt
+  picture
+}
+
 query loadGroup($groupId: Int) {
   groups(groupId: $groupId) {
 	...GroupFields
   }
-}
-
-fragment GroupFields on Group {
-  id
-  name
 }
 
 mutation createExamples {
@@ -21,8 +23,7 @@ fragment UserRef on User {
   picture
 }
 
-query queryGroups {
-  groups {
+fragment ListedGroupFields on Group {
 	id
 	owner {
 	  ...UserRef
@@ -30,6 +31,11 @@ query queryGroups {
 	name
 	activityAt
 	picture
+}
+
+query queryGroups {
+  groups {
+	...ListedGroupFields
   }
 }
 

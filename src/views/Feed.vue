@@ -44,6 +44,19 @@ export default Vue.extend({
     overflow-x: hidden;
 
     & .entry.bet {
+        &.me {
+            .md-card {
+                order: 2;
+                float: right;
+            }
+        }
+
+        .md-card {
+            width: 320px;
+            margin: 4px;
+            display: inline-block;
+            vertical-align: top;
+        }
     }
 
     & .entry {
@@ -54,20 +67,21 @@ export default Vue.extend({
         text-align: left;
 
         &.me {
-            & img {
+            & img.feed-photo {
                 order: 2;
                 margin: 0 0 0 3px;
             }
 
-            & div {
+            & div.feed-body {
                 order: 1;
                 padding: 0 8px 0 0;
+                justify-content: flex-end;
 
                 & p {
-                    float: right;
+                    align-self: flex-end;
                     background: #afefaf;
                 }
-
+                /*
                 &:before {
                     position: relative;
                     float: right;
@@ -79,10 +93,11 @@ export default Vue.extend({
                     border-width: 8px 0 8px 8px;
                     border-color: transparent transparent transparent #fff;
                 }
+				*/
             }
         }
 
-        & img {
+        & img.feed-photo {
             display: block;
             order: 1;
             margin: 0 10px 0 0;
@@ -94,12 +109,14 @@ export default Vue.extend({
             -webkit-user-select: none;
         }
 
-        & div {
-            display: block;
+        & div.feed-body {
+            display: flex;
+            flex-direction: column;
             flex: 1;
             order: 2;
 
             & p {
+                align-self: flex-start;
                 display: inline-block;
                 margin: 0;
                 width: auto;
@@ -111,6 +128,7 @@ export default Vue.extend({
                 box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             }
 
+            /*
             &:before {
                 position: relative;
                 float: left;
@@ -122,6 +140,7 @@ export default Vue.extend({
                 border-width: 8px 8px 8px 0;
                 border-color: transparent #fff transparent transparent;
             }
+			*/
         }
     }
 }
