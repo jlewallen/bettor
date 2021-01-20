@@ -349,24 +349,6 @@ export type CreateExamplesMutation = (
   )> }
 );
 
-export type SayGroupChatMutationVariables = Exact<{
-  groupId: Scalars['Int'];
-  message?: Maybe<Scalars['String']>;
-}>;
-
-
-export type SayGroupChatMutation = (
-  { __typename?: 'Mutation' }
-  & { sayGroupChat?: Maybe<(
-    { __typename?: 'SayGroupChat' }
-    & Pick<SayGroupChat, 'ok'>
-    & { message?: Maybe<(
-      { __typename?: 'GroupChat' }
-      & Pick<GroupChat, 'id'>
-    )> }
-  )> }
-);
-
 export type UserRefFragment = (
   { __typename?: 'User' }
   & Pick<User, 'id' | 'name' | 'picture'>
@@ -492,6 +474,42 @@ export type QuerySelfQuery = (
   )> }
 );
 
+export type SayGroupChatMutationVariables = Exact<{
+  groupId: Scalars['Int'];
+  message?: Maybe<Scalars['String']>;
+}>;
+
+
+export type SayGroupChatMutation = (
+  { __typename?: 'Mutation' }
+  & { sayGroupChat?: Maybe<(
+    { __typename?: 'SayGroupChat' }
+    & Pick<SayGroupChat, 'ok'>
+    & { message?: Maybe<(
+      { __typename?: 'GroupChat' }
+      & GroupChatMessageFieldsFragment
+    )> }
+  )> }
+);
+
+export type SayBetChatMutationVariables = Exact<{
+  betId: Scalars['Int'];
+  message?: Maybe<Scalars['String']>;
+}>;
+
+
+export type SayBetChatMutation = (
+  { __typename?: 'Mutation' }
+  & { sayBetChat?: Maybe<(
+    { __typename?: 'SayBetChat' }
+    & Pick<SayBetChat, 'ok'>
+    & { message?: Maybe<(
+      { __typename?: 'BetChat' }
+      & BetChatMessageFieldsFragment
+    )> }
+  )> }
+);
+
 export const GroupFieldsFragmentDoc = gql`
     fragment GroupFields on Group {
   id
@@ -581,16 +599,6 @@ export const CreateExamplesDocument = gql`
   }
 }
     `;
-export const SayGroupChatDocument = gql`
-    mutation sayGroupChat($groupId: Int!, $message: String) {
-  sayGroupChat(payload: {groupId: $groupId, message: $message}) {
-    message {
-      id
-    }
-    ok
-  }
-}
-    `;
 export const QueryGroupsDocument = gql`
     query queryGroups {
   groups {
@@ -632,6 +640,26 @@ export const QuerySelfDocument = gql`
   }
 }
     ${UserRefFragmentDoc}`;
+export const SayGroupChatDocument = gql`
+    mutation sayGroupChat($groupId: Int!, $message: String) {
+  sayGroupChat(payload: {groupId: $groupId, message: $message}) {
+    message {
+      ...GroupChatMessageFields
+    }
+    ok
+  }
+}
+    ${GroupChatMessageFieldsFragmentDoc}`;
+export const SayBetChatDocument = gql`
+    mutation sayBetChat($betId: Int!, $message: String) {
+  sayBetChat(payload: {betId: $betId, message: $message}) {
+    message {
+      ...BetChatMessageFields
+    }
+    ok
+  }
+}
+    ${BetChatMessageFieldsFragmentDoc}`;
 
 export type SdkFunctionWrapper = <T>(action: () => Promise<T>) => Promise<T>;
 
@@ -644,9 +672,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     createExamples(variables?: CreateExamplesMutationVariables, requestHeaders?: Headers): Promise<CreateExamplesMutation> {
       return withWrapper(() => client.request<CreateExamplesMutation>(print(CreateExamplesDocument), variables, requestHeaders));
-    },
-    sayGroupChat(variables: SayGroupChatMutationVariables, requestHeaders?: Headers): Promise<SayGroupChatMutation> {
-      return withWrapper(() => client.request<SayGroupChatMutation>(print(SayGroupChatDocument), variables, requestHeaders));
     },
     queryGroups(variables?: QueryGroupsQueryVariables, requestHeaders?: Headers): Promise<QueryGroupsQuery> {
       return withWrapper(() => client.request<QueryGroupsQuery>(print(QueryGroupsDocument), variables, requestHeaders));
@@ -662,6 +687,12 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     querySelf(variables?: QuerySelfQueryVariables, requestHeaders?: Headers): Promise<QuerySelfQuery> {
       return withWrapper(() => client.request<QuerySelfQuery>(print(QuerySelfDocument), variables, requestHeaders));
+    },
+    sayGroupChat(variables: SayGroupChatMutationVariables, requestHeaders?: Headers): Promise<SayGroupChatMutation> {
+      return withWrapper(() => client.request<SayGroupChatMutation>(print(SayGroupChatDocument), variables, requestHeaders));
+    },
+    sayBetChat(variables: SayBetChatMutationVariables, requestHeaders?: Headers): Promise<SayBetChatMutation> {
+      return withWrapper(() => client.request<SayBetChatMutation>(print(SayBetChatDocument), variables, requestHeaders));
     }
   };
 }

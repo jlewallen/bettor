@@ -15,13 +15,6 @@ mutation createExamples {
 	}
 }
 
-mutation sayGroupChat($groupId: Int!, $message: String) {
-	sayGroupChat(payload: { groupId: $groupId, message: $message }) {
-		message { id }
-		ok
-	}
-}
-
 fragment UserRef on User {
 	id
 	name
@@ -108,5 +101,23 @@ query queryBetChat($betId: Int!, $page: Int!) {
 query querySelf {
 	myself {
 		...UserRef
+	}
+}
+
+mutation sayGroupChat($groupId: Int!, $message: String) {
+	sayGroupChat(payload: { groupId: $groupId, message: $message }) {
+		message {
+			...GroupChatMessageFields
+		}
+		ok
+	}
+}
+
+mutation sayBetChat($betId: Int!, $message: String) {
+	sayBetChat(payload: { betId: $betId, message: $message }) {
+		message {
+			...BetChatMessageFields
+		}
+		ok
 	}
 }

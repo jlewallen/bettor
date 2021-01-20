@@ -19,6 +19,7 @@ export enum MutationTypes {
     REFRESH_GROUP_CHAT = "REFRESH_GROUP_CHAT",
     REFRESH_BET_CHAT = "REFRESH_BET_CHAT",
     REFRESH_FEED = "REFRESH_FEED",
+    APPEND_GROUP_FEED_CHAT = "APPEND_GROUP_FEED_CHAT",
 }
 
 export enum ActionTypes {
@@ -77,8 +78,12 @@ export class Feed {
         const bets: FeedEntry[] = group.allBets.map((b) => new BetEntry(b!));
         const messages: FeedEntry[] = chat.map((c) => new ChatEntry(c!));
         this.id = group.id;
-        this.entries = _.reverse(_.sortBy(_.flatten([bets, messages]), (e) => e.time));
+        this.entries = _.sortBy(_.flatten([bets, messages]), (e) => e.time);
         console.log(`feed`, this.entries);
+    }
+
+    public appendChat(message: GroupChatMessageFieldsFragment): Feed {
+        return new Feed(this.group, [...this.chat, message]);
     }
 }
 
@@ -107,6 +112,9 @@ export default new Vuex.Store({
         },
         [MutationTypes.REFRESH_FEED]: (state: State, feed: Feed) => {
             Vue.set(state.feeds, feed.id, feed);
+        },
+        [MutationTypes.APPEND_GROUP_FEED_CHAT]: (state: State, payload: { groupId: number; message: GroupChatMessageFieldsFragment }) => {
+            state.feeds[payload.groupId] = state.feeds[payload.groupId].appendChat(payload.message);
         },
     },
     actions: {
@@ -142,7 +150,10 @@ export default new Vuex.Store({
             }
         },
         [ActionTypes.SAY_GROUP]: async ({ commit, dispatch }, payload: SayGroupAction) => {
-            await getApi().sayGroupChat({ groupId: payload.groupId, message: payload.message });
+            const response = await getApi().sayGroupChat({ groupId: payload.groupId, message: payload.message });
+            if (response?.sayGroupChat?.message) {
+                commit(MutationTypes.APPEND_GROUP_FEED_CHAT, { groupId: payload.groupId, message: response.sayGroupChat.message });
+            }
         },
     },
     getters: {

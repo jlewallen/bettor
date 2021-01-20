@@ -1,6 +1,6 @@
 <template>
     <div class="entry chat" v-on:click="raiseTap" v-bind:class="{ me: myself() }">
-        <UserPhoto :user="entry.bet.author" />
+        <UserPhoto :user="entry.message.author" />
         <div>
             <p class="message">
                 {{ entry.message.message }}
