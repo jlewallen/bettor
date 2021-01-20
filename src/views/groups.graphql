@@ -1,123 +1,123 @@
 query loadGroup($groupId: Int) {
-	groups(groupId: $groupId) {
-		...GroupFields
-	}
+  groups(groupId: $groupId) {
+	...GroupFields
+  }
 }
 
 fragment GroupFields on Group {
-	id
-	name
+  id
+  name
 }
 
 mutation createExamples {
-	createExamples {
-		ok
-	}
+  createExamples {
+	ok
+  }
 }
 
 fragment UserRef on User {
-	id
-	name
-	picture
+  id
+  name
+  picture
 }
 
 query queryGroups {
-	groups {
-		id
-		owner {
-			...UserRef
-		}
-		name
-		activityAt
-		picture
-	}
-}
-
-fragment QueriedBetFields on Bet {
-	id
-	title
-	details
-	createdAt
-	expiresAt
-	activityAt
-	state
-	author {
-		...UserRef
-	}
-	positions {
-		title
-		userPositions {
-			user {
-				...UserRef
-			}
-			createdAt
-			state
-		}
-	}
-}
-
-fragment QueriedGroupFields on Group {
+  groups {
 	id
 	owner {
-		...UserRef
+	  ...UserRef
 	}
 	name
 	activityAt
 	picture
-	members {
+  }
+}
+
+fragment QueriedBetFields on Bet {
+  id
+  title
+  details
+  createdAt
+  expiresAt
+  activityAt
+  state
+  author {
+	...UserRef
+  }
+  positions {
+	title
+	userPositions {
+	  user {
 		...UserRef
+	  }
+	  createdAt
+	  state
 	}
-	allBets {
-		...QueriedBetFields
-	}
+  }
+}
+
+fragment QueriedGroupFields on Group {
+  id
+  owner {
+	...UserRef
+  }
+  name
+  activityAt
+  picture
+  members {
+	...UserRef
+  }
+  allBets {
+	...QueriedBetFields
+  }
 }
 
 query queryGroup($groupId: Int!) {
-	groups(groupId: $groupId) {
-		...QueriedGroupFields
-	}
+  groups(groupId: $groupId) {
+	...QueriedGroupFields
+  }
 }
 
 fragment GroupChatMessageFields on GroupChat {
-	id createdAt message author { ...UserRef }
+  id createdAt message author { ...UserRef }
 }
 
 query queryGroupChat($groupId: Int!, $page: Int!) {
-    groupChat(groupId: $groupId, page: $page) {
-		...GroupChatMessageFields
-	}
+  groupChat(groupId: $groupId, page: $page) {
+	...GroupChatMessageFields
+  }
 }
 
 fragment BetChatMessageFields on BetChat {
-	id createdAt message author { ...UserRef }
+  id createdAt message author { ...UserRef }
 }
 
 query queryBetChat($betId: Int!, $page: Int!) {
-    betChat(betId: $betId, page: $page) {
-		...BetChatMessageFields
-	}
+  betChat(betId: $betId, page: $page) {
+	...BetChatMessageFields
+  }
 }
 
 query querySelf {
-	myself {
-		...UserRef
-	}
+  myself {
+	...UserRef
+  }
 }
 
 mutation sayGroupChat($groupId: Int!, $message: String) {
-	sayGroupChat(payload: { groupId: $groupId, message: $message }) {
-		message {
-			...GroupChatMessageFields
-		}
-		ok
+  sayGroupChat(payload: { groupId: $groupId, message: $message }) {
+	message {
+	  ...GroupChatMessageFields
 	}
+	ok
+  }
 }
 
 mutation sayBetChat($betId: Int!, $message: String) {
-	sayBetChat(payload: { betId: $betId, message: $message }) {
-		message {
-			...BetChatMessageFields
-		}
-		ok
+  sayBetChat(payload: { betId: $betId, message: $message }) {
+	message {
+	  ...BetChatMessageFields
 	}
+	ok
+  }
 }

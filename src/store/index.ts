@@ -40,9 +40,15 @@ export class SayGroupAction {
     constructor(public readonly groupId: number, public readonly message: string) {}
 }
 
+export interface FeedVisitor {
+    visitChat(entry: ChatEntry): void;
+    visitBet(entry: BetEntry): void;
+}
+
 export interface FeedEntry {
     id: string;
     time: Date;
+    accept(visitor: FeedVisitor): void;
 }
 
 export class ChatEntry implements FeedEntry {
@@ -55,6 +61,10 @@ export class ChatEntry implements FeedEntry {
     }
 
     constructor(public readonly message: GroupChatMessageFieldsFragment) {}
+
+    public accept(visitor: FeedVisitor): void {
+        return visitor.visitChat(this);
+    }
 }
 
 export class BetEntry implements FeedEntry {
@@ -67,23 +77,29 @@ export class BetEntry implements FeedEntry {
     }
 
     constructor(public readonly bet: QueriedBetFieldsFragment) {}
+
+    public accept(visitor: FeedVisitor): void {
+        return visitor.visitBet(this);
+    }
 }
 
 export class Feed {
     public readonly id: string;
     public readonly entries: FeedEntry[];
 
-    constructor(public readonly group: QueriedGroupFieldsFragment, public readonly chat: GroupChatMessageFieldsFragment[]) {
+    constructor(public readonly group: QueriedGroupFieldsFragment, public readonly chats: GroupChatMessageFieldsFragment[]) {
         if (!group.allBets) throw new Error(`malformed`);
         const bets: FeedEntry[] = group.allBets.map((b) => new BetEntry(b!));
-        const messages: FeedEntry[] = chat.map((c) => new ChatEntry(c!));
+        const messages: FeedEntry[] = chats.map((c) => new ChatEntry(c!));
         this.id = group.id;
         this.entries = _.sortBy(_.flatten([bets, messages]), (e) => e.time);
+        console.log(`group`, group);
+        console.log(`chats`, chats);
         console.log(`feed`, this.entries);
     }
 
     public appendChat(message: GroupChatMessageFieldsFragment): Feed {
-        return new Feed(this.group, [...this.chat, message]);
+        return new Feed(this.group, [...this.chats, message]);
     }
 }
 
@@ -143,8 +159,6 @@ export default new Vuex.Store({
 
             if (groups && groups.groups && groups.groups.length == 1 && chats && chats.groupChat) {
                 const group = groups.groups[0];
-                console.log(group);
-                console.log(chats);
                 const feed = new Feed(group, chats.groupChat);
                 commit(MutationTypes.REFRESH_FEED, feed);
             }
