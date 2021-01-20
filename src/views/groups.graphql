@@ -21,3 +21,79 @@ mutation sayGroupChat($groupId: Int!, $message: String) {
 		ok
 	}
 }
+
+fragment UserRef on User {
+	id
+	name
+	picture
+}
+
+query queryGroups {
+	groups {
+		id
+		owner {
+			...UserRef
+		}
+		name
+		activityAt
+		picture
+	}
+}
+
+query queryGroup($groupId: Int!) {
+	groups(groupId: $groupId) {
+		id
+		owner {
+			...UserRef
+		}
+		name
+		activityAt
+		picture
+		members {
+			...UserRef
+		}
+		allBets {
+			id
+			title
+			details
+			createdAt
+			expiresAt
+			activityAt
+			state
+			author {
+				...UserRef
+			}
+			positions {
+				title
+				userPositions {
+					user {
+						...UserRef
+					}
+					createdAt
+					state
+				}
+			}
+		}
+	}
+}
+
+
+fragment GroupChatMessageFields on GroupChat {
+	id createdAt message author { ...UserRef }
+}
+
+query queryGroupChat($groupId: Int!, $page: Int!) {
+    groupChat(groupId: $groupId, page: $page) {
+		...GroupChatMessageFields
+	}
+}
+
+fragment BetChatMessageFields on BetChat {
+	id createdAt message author { ...UserRef }
+}
+
+query queryBetChat($betId: Int!, $page: Int!) {
+    betChat(betId: $betId, page: $page) {
+		...BetChatMessageFields
+	}
+}

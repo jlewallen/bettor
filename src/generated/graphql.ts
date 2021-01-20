@@ -367,12 +367,143 @@ export type SayGroupChatMutation = (
   )> }
 );
 
+export type UserRefFragment = (
+  { __typename?: 'User' }
+  & Pick<User, 'id' | 'name' | 'picture'>
+);
+
+export type QueryGroupsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type QueryGroupsQuery = (
+  { __typename?: 'Query' }
+  & { groups?: Maybe<Array<Maybe<(
+    { __typename?: 'Group' }
+    & Pick<Group, 'id' | 'name' | 'activityAt' | 'picture'>
+    & { owner?: Maybe<(
+      { __typename?: 'User' }
+      & UserRefFragment
+    )> }
+  )>>> }
+);
+
+export type QueryGroupQueryVariables = Exact<{
+  groupId: Scalars['Int'];
+}>;
+
+
+export type QueryGroupQuery = (
+  { __typename?: 'Query' }
+  & { groups?: Maybe<Array<Maybe<(
+    { __typename?: 'Group' }
+    & Pick<Group, 'id' | 'name' | 'activityAt' | 'picture'>
+    & { owner?: Maybe<(
+      { __typename?: 'User' }
+      & UserRefFragment
+    )>, members?: Maybe<Array<Maybe<(
+      { __typename?: 'User' }
+      & UserRefFragment
+    )>>>, allBets?: Maybe<Array<Maybe<(
+      { __typename?: 'Bet' }
+      & Pick<Bet, 'id' | 'title' | 'details' | 'createdAt' | 'expiresAt' | 'activityAt' | 'state'>
+      & { author?: Maybe<(
+        { __typename?: 'User' }
+        & UserRefFragment
+      )>, positions?: Maybe<Array<Maybe<(
+        { __typename?: 'Position' }
+        & Pick<Position, 'title'>
+        & { userPositions?: Maybe<Array<Maybe<(
+          { __typename?: 'UserPosition' }
+          & Pick<UserPosition, 'createdAt' | 'state'>
+          & { user?: Maybe<(
+            { __typename?: 'User' }
+            & UserRefFragment
+          )> }
+        )>>> }
+      )>>> }
+    )>>> }
+  )>>> }
+);
+
+export type GroupChatMessageFieldsFragment = (
+  { __typename?: 'GroupChat' }
+  & Pick<GroupChat, 'id' | 'createdAt' | 'message'>
+  & { author?: Maybe<(
+    { __typename?: 'User' }
+    & UserRefFragment
+  )> }
+);
+
+export type QueryGroupChatQueryVariables = Exact<{
+  groupId: Scalars['Int'];
+  page: Scalars['Int'];
+}>;
+
+
+export type QueryGroupChatQuery = (
+  { __typename?: 'Query' }
+  & { groupChat?: Maybe<Array<Maybe<(
+    { __typename?: 'GroupChat' }
+    & GroupChatMessageFieldsFragment
+  )>>> }
+);
+
+export type BetChatMessageFieldsFragment = (
+  { __typename?: 'BetChat' }
+  & Pick<BetChat, 'id' | 'createdAt' | 'message'>
+  & { author?: Maybe<(
+    { __typename?: 'User' }
+    & UserRefFragment
+  )> }
+);
+
+export type QueryBetChatQueryVariables = Exact<{
+  betId: Scalars['Int'];
+  page: Scalars['Int'];
+}>;
+
+
+export type QueryBetChatQuery = (
+  { __typename?: 'Query' }
+  & { betChat?: Maybe<Array<Maybe<(
+    { __typename?: 'BetChat' }
+    & BetChatMessageFieldsFragment
+  )>>> }
+);
+
 export const GroupFieldsFragmentDoc = gql`
     fragment GroupFields on Group {
   id
   name
 }
     `;
+export const UserRefFragmentDoc = gql`
+    fragment UserRef on User {
+  id
+  name
+  picture
+}
+    `;
+export const GroupChatMessageFieldsFragmentDoc = gql`
+    fragment GroupChatMessageFields on GroupChat {
+  id
+  createdAt
+  message
+  author {
+    ...UserRef
+  }
+}
+    ${UserRefFragmentDoc}`;
+export const BetChatMessageFieldsFragmentDoc = gql`
+    fragment BetChatMessageFields on BetChat {
+  id
+  createdAt
+  message
+  author {
+    ...UserRef
+  }
+}
+    ${UserRefFragmentDoc}`;
 export const LoadGroupDocument = gql`
     query loadGroup($groupId: Int) {
   groups(groupId: $groupId) {
@@ -397,6 +528,71 @@ export const SayGroupChatDocument = gql`
   }
 }
     `;
+export const QueryGroupsDocument = gql`
+    query queryGroups {
+  groups {
+    id
+    owner {
+      ...UserRef
+    }
+    name
+    activityAt
+    picture
+  }
+}
+    ${UserRefFragmentDoc}`;
+export const QueryGroupDocument = gql`
+    query queryGroup($groupId: Int!) {
+  groups(groupId: $groupId) {
+    id
+    owner {
+      ...UserRef
+    }
+    name
+    activityAt
+    picture
+    members {
+      ...UserRef
+    }
+    allBets {
+      id
+      title
+      details
+      createdAt
+      expiresAt
+      activityAt
+      state
+      author {
+        ...UserRef
+      }
+      positions {
+        title
+        userPositions {
+          user {
+            ...UserRef
+          }
+          createdAt
+          state
+        }
+      }
+    }
+  }
+}
+    ${UserRefFragmentDoc}`;
+export const QueryGroupChatDocument = gql`
+    query queryGroupChat($groupId: Int!, $page: Int!) {
+  groupChat(groupId: $groupId, page: $page) {
+    ...GroupChatMessageFields
+  }
+}
+    ${GroupChatMessageFieldsFragmentDoc}`;
+export const QueryBetChatDocument = gql`
+    query queryBetChat($betId: Int!, $page: Int!) {
+  betChat(betId: $betId, page: $page) {
+    ...BetChatMessageFields
+  }
+}
+    ${BetChatMessageFieldsFragmentDoc}`;
 
 export type SdkFunctionWrapper = <T>(action: () => Promise<T>) => Promise<T>;
 
@@ -412,6 +608,18 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     sayGroupChat(variables: SayGroupChatMutationVariables, requestHeaders?: Headers): Promise<SayGroupChatMutation> {
       return withWrapper(() => client.request<SayGroupChatMutation>(print(SayGroupChatDocument), variables, requestHeaders));
+    },
+    queryGroups(variables?: QueryGroupsQueryVariables, requestHeaders?: Headers): Promise<QueryGroupsQuery> {
+      return withWrapper(() => client.request<QueryGroupsQuery>(print(QueryGroupsDocument), variables, requestHeaders));
+    },
+    queryGroup(variables: QueryGroupQueryVariables, requestHeaders?: Headers): Promise<QueryGroupQuery> {
+      return withWrapper(() => client.request<QueryGroupQuery>(print(QueryGroupDocument), variables, requestHeaders));
+    },
+    queryGroupChat(variables: QueryGroupChatQueryVariables, requestHeaders?: Headers): Promise<QueryGroupChatQuery> {
+      return withWrapper(() => client.request<QueryGroupChatQuery>(print(QueryGroupChatDocument), variables, requestHeaders));
+    },
+    queryBetChat(variables: QueryBetChatQueryVariables, requestHeaders?: Headers): Promise<QueryBetChatQuery> {
+      return withWrapper(() => client.request<QueryBetChatQuery>(print(QueryBetChatDocument), variables, requestHeaders));
     }
   };
 }

@@ -3,11 +3,9 @@ import Vue from "vue";
 import Vuex from "vuex";
 import { createLogger } from "vuex";
 
-import { authenticated, graphql, queryGroups, groupChat, betChat, Group, Bet, Person } from "../http";
+import { authenticated, Group, Bet, LoginPerson, getApi } from "../http";
 
-export { authenticated, Group, Bet, Person };
-
-// import { GroupChatPayload } from "@/schema";
+export { authenticated, Group, Bet, LoginPerson };
 
 export enum MutationTypes {
     REFRESH_USER = "REFRESH_USER",
@@ -37,19 +35,17 @@ export class SayGroupAction {
 
 export class State {
     constructor(
-        public readonly self: Person | null = null,
+        public readonly self: LoginPerson | null = null,
         public readonly groups: { [id: number]: Group } = {},
         public readonly bets: { [id: number]: Bet } = {}
     ) {}
 }
 
-export interface Feed {
-    id: number;
+export class Feed {
+    constructor(public readonly group: string, public readonly chat: any) {}
 }
 
 Vue.use(Vuex);
-
-import { getApi } from "@/http";
 
 export default new Vuex.Store({
     plugins: [createLogger()],
@@ -63,17 +59,29 @@ export default new Vuex.Store({
     },
     actions: {
         [ActionTypes.LOAD_USER]: async ({ commit }) => {
-            let groups = await queryGroups();
-            if (groups.groups.length == 0) {
-                await getApi().createExamples();
-                groups = await queryGroups();
+            const api = await getApi();
+
+            let groups = await api.queryGroups();
+            if (groups && groups.groups && groups.groups.length == 0) {
+                await api.createExamples();
+                groups = await api.queryGroups();
             }
 
             commit(MutationTypes.REFRESH_GROUPS, groups.groups);
         },
         [ActionTypes.LOAD_GROUP]: async ({ commit, dispatch }, payload: LoadGroupAction) => {
+            const api = await getApi();
             await dispatch(ActionTypes.LOAD_USER);
-            await groupChat(payload.groupId, 0);
+
+            const groups = await api.queryGroup(payload);
+            const chats = await api.queryGroupChat({ groupId: payload.groupId, page: 0 });
+
+            if (groups && chats && groups.groups) {
+                console.log(groups.groups[0]);
+                console.log(chats);
+
+                new Feed(groups.groups[0], chats);
+            }
         },
         [ActionTypes.SAY_GROUP]: async ({ commit, dispatch }, payload: SayGroupAction) => {
             await getApi().sayGroupChat({ groupId: payload.groupId, message: payload.message });
