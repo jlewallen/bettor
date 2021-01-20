@@ -7,7 +7,7 @@ import { authenticated, graphql, queryGroups, groupChat, betChat, Group, Bet, Pe
 
 export { authenticated, Group, Bet, Person };
 
-Vue.use(Vuex);
+// import { GroupChatPayload } from "@/schema";
 
 export enum MutationTypes {
     REFRESH_USER = "REFRESH_USER",
@@ -20,6 +20,19 @@ export enum MutationTypes {
 export enum ActionTypes {
     LOAD_USER = "LOAD_USER",
     LOAD_GROUP = "LOAD_GROUP",
+    SAY_GROUP = "SAY_GROUP",
+}
+
+export class LoadGroupAction {
+    type = ActionTypes.LOAD_GROUP;
+
+    constructor(public readonly groupId: number) {}
+}
+
+export class SayGroupAction {
+    type = ActionTypes.SAY_GROUP;
+
+    constructor(public readonly groupId: number, public readonly message: string) {}
 }
 
 export class State {
@@ -33,6 +46,10 @@ export class State {
 export interface Feed {
     id: number;
 }
+
+Vue.use(Vuex);
+
+import { getApi } from "@/http";
 
 export default new Vuex.Store({
     plugins: [createLogger()],
@@ -48,21 +65,18 @@ export default new Vuex.Store({
         [ActionTypes.LOAD_USER]: async ({ commit }) => {
             let groups = await queryGroups();
             if (groups.groups.length == 0) {
-                await graphql<never>(`
-                    mutation {
-                        createExamples {
-                            ok
-                        }
-                    }
-                `);
+                await getApi().createExamples();
                 groups = await queryGroups();
             }
 
             commit(MutationTypes.REFRESH_GROUPS, groups.groups);
         },
-        [ActionTypes.LOAD_GROUP]: async ({ commit, dispatch }, payload: { id: number }) => {
+        [ActionTypes.LOAD_GROUP]: async ({ commit, dispatch }, payload: LoadGroupAction) => {
             await dispatch(ActionTypes.LOAD_USER);
-            await groupChat(payload.id, 0);
+            await groupChat(payload.groupId, 0);
+        },
+        [ActionTypes.SAY_GROUP]: async ({ commit, dispatch }, payload: SayGroupAction) => {
+            await getApi().sayGroupChat({ groupId: payload.groupId, message: payload.message });
         },
     },
     getters: {

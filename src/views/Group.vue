@@ -4,7 +4,7 @@
             {{ group.name }}
         </h1>
         <Feed />
-        <ChatMessage />
+        <ChatMessage @send="talk" />
     </div>
 </template>
 
@@ -13,7 +13,7 @@ import Vue from "vue";
 import Feed from "./Feed.vue";
 import ChatMessage from "./ChatMessage.vue";
 
-import { authenticated, ActionTypes, Group } from "@/store";
+import { authenticated, LoadGroupAction, SayGroupAction, Group } from "@/store";
 
 export default Vue.extend({
     name: "Group",
@@ -45,8 +45,13 @@ export default Vue.extend({
             return;
         }
         this.loading = true;
-        await this.$store.dispatch(ActionTypes.LOAD_GROUP, { id: this.id });
+        await this.$store.dispatch(new LoadGroupAction(this.id));
         this.loading = false;
+    },
+    methods: {
+        async talk(form: { message: string }): Promise<void> {
+            await this.$store.dispatch(new SayGroupAction(this.id, form.message));
+        },
     },
 });
 </script>
