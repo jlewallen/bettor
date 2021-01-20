@@ -51,9 +51,10 @@ class User(Base):
         self.activity_at = datetime.datetime.utcnow()
 
     def __repr__(self):
-        return "<User(id='%s', name='%s')>" % (
+        return "<User(id='%s', name='%s', picture='%s')>" % (
             self.id,
             self.name,
+            self.picture
         )
 
 
@@ -90,9 +91,10 @@ class Group(Base):
         return user
 
     def __repr__(self):
-        return "<Group(id='%s', name='%s')>" % (
+        return "<Group(id='%s', name='%s', picture='%s')>" % (
             self.id,
             self.name,
+            self.picture
         )
 
 
@@ -319,7 +321,7 @@ def flatten(l):
 
 
 def create_examples():
-    jacob = User(sub="", name="Jacob", email="jlewalle@gmail.com")
+    jacob = User(sub="", name="Jacob", email="jlewalle@gmail.com", picture="https://lh3.googleusercontent.com/a-/AOh14Gjl9_87qIin3U2czS8qz9frvvSLvEkKoBwQfcvRcg=s96-c")
     stephen = User(sub="", name="Stephen", email="stephen@example.com")
     jimmy = User(sub="", name="Jimmy", email="jimmy@example.com")
     derek = User(sub="", name="Derek", email="derek@example.com")

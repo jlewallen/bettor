@@ -387,6 +387,26 @@ export type QueryGroupsQuery = (
   )>> }
 );
 
+export type QueriedBetFieldsFragment = (
+  { __typename?: 'Bet' }
+  & Pick<Bet, 'id' | 'title' | 'details' | 'createdAt' | 'expiresAt' | 'activityAt' | 'state'>
+  & { author?: Maybe<(
+    { __typename?: 'User' }
+    & UserRefFragment
+  )>, positions?: Maybe<Array<Maybe<(
+    { __typename?: 'Position' }
+    & Pick<Position, 'title'>
+    & { userPositions?: Maybe<Array<Maybe<(
+      { __typename?: 'UserPosition' }
+      & Pick<UserPosition, 'createdAt' | 'state'>
+      & { user?: Maybe<(
+        { __typename?: 'User' }
+        & UserRefFragment
+      )> }
+    )>>> }
+  )>>> }
+);
+
 export type QueriedGroupFieldsFragment = (
   { __typename?: 'Group' }
   & Pick<Group, 'id' | 'name' | 'activityAt' | 'picture'>
@@ -398,22 +418,7 @@ export type QueriedGroupFieldsFragment = (
     & UserRefFragment
   )>>>, allBets?: Maybe<Array<Maybe<(
     { __typename?: 'Bet' }
-    & Pick<Bet, 'id' | 'title' | 'details' | 'createdAt' | 'expiresAt' | 'activityAt' | 'state'>
-    & { author?: Maybe<(
-      { __typename?: 'User' }
-      & UserRefFragment
-    )>, positions?: Maybe<Array<Maybe<(
-      { __typename?: 'Position' }
-      & Pick<Position, 'title'>
-      & { userPositions?: Maybe<Array<Maybe<(
-        { __typename?: 'UserPosition' }
-        & Pick<UserPosition, 'createdAt' | 'state'>
-        & { user?: Maybe<(
-          { __typename?: 'User' }
-          & UserRefFragment
-        )> }
-      )>>> }
-    )>>> }
+    & QueriedBetFieldsFragment
   )>>> }
 );
 
@@ -476,6 +481,17 @@ export type QueryBetChatQuery = (
   )>> }
 );
 
+export type QuerySelfQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type QuerySelfQuery = (
+  { __typename?: 'Query' }
+  & { myself?: Maybe<(
+    { __typename?: 'User' }
+    & UserRefFragment
+  )> }
+);
+
 export const GroupFieldsFragmentDoc = gql`
     fragment GroupFields on Group {
   id
@@ -489,6 +505,30 @@ export const UserRefFragmentDoc = gql`
   picture
 }
     `;
+export const QueriedBetFieldsFragmentDoc = gql`
+    fragment QueriedBetFields on Bet {
+  id
+  title
+  details
+  createdAt
+  expiresAt
+  activityAt
+  state
+  author {
+    ...UserRef
+  }
+  positions {
+    title
+    userPositions {
+      user {
+        ...UserRef
+      }
+      createdAt
+      state
+    }
+  }
+}
+    ${UserRefFragmentDoc}`;
 export const QueriedGroupFieldsFragmentDoc = gql`
     fragment QueriedGroupFields on Group {
   id
@@ -502,29 +542,11 @@ export const QueriedGroupFieldsFragmentDoc = gql`
     ...UserRef
   }
   allBets {
-    id
-    title
-    details
-    createdAt
-    expiresAt
-    activityAt
-    state
-    author {
-      ...UserRef
-    }
-    positions {
-      title
-      userPositions {
-        user {
-          ...UserRef
-        }
-        createdAt
-        state
-      }
-    }
+    ...QueriedBetFields
   }
 }
-    ${UserRefFragmentDoc}`;
+    ${UserRefFragmentDoc}
+${QueriedBetFieldsFragmentDoc}`;
 export const GroupChatMessageFieldsFragmentDoc = gql`
     fragment GroupChatMessageFields on GroupChat {
   id
@@ -603,6 +625,13 @@ export const QueryBetChatDocument = gql`
   }
 }
     ${BetChatMessageFieldsFragmentDoc}`;
+export const QuerySelfDocument = gql`
+    query querySelf {
+  myself {
+    ...UserRef
+  }
+}
+    ${UserRefFragmentDoc}`;
 
 export type SdkFunctionWrapper = <T>(action: () => Promise<T>) => Promise<T>;
 
@@ -630,6 +659,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     queryBetChat(variables: QueryBetChatQueryVariables, requestHeaders?: Headers): Promise<QueryBetChatQuery> {
       return withWrapper(() => client.request<QueryBetChatQuery>(print(QueryBetChatDocument), variables, requestHeaders));
+    },
+    querySelf(variables?: QuerySelfQueryVariables, requestHeaders?: Headers): Promise<QuerySelfQuery> {
+      return withWrapper(() => client.request<QuerySelfQuery>(print(QuerySelfDocument), variables, requestHeaders));
     }
   };
 }

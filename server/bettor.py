@@ -56,7 +56,6 @@ def create_app():
             decoded = jwt.decode(
                 base64.b64decode(encoded), session_key, algorithms="HS256"
             )
-            google_id = decoded["sub"]
             email = decoded["email"]
             user = session.query(models.User).filter(models.User.email == email).first()
             if user is None:

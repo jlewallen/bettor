@@ -1,9 +1,9 @@
 <template>
-    <div class="group" v-if="group">
+    <div class="group" v-if="group && self">
         <h1>
             {{ group.name }}
         </h1>
-        <Feed />
+        <Feed :feed="feed" v-if="feed" @selected="onSelected" />
         <ChatMessage @send="talk" />
     </div>
 </template>
@@ -13,7 +13,7 @@ import Vue from "vue";
 import Feed from "./Feed.vue";
 import ChatMessage from "./ChatMessage.vue";
 
-import { authenticated, LoadGroupAction, SayGroupAction, Group } from "@/store";
+import { authenticated, LoadGroupAction, SayGroupAction, Group, Feed as FeedModel, FeedEntry, UserRefFragment } from "@/store";
 
 export default Vue.extend({
     name: "Group",
@@ -35,6 +35,12 @@ export default Vue.extend({
         };
     },
     computed: {
+        self(): UserRefFragment {
+            return this.$store.state.self;
+        },
+        feed(): FeedModel {
+            return this.$store.state.feeds[this.id];
+        },
         group(): Group {
             return this.$store.state.groups[this.id];
         },
@@ -51,6 +57,9 @@ export default Vue.extend({
     methods: {
         async talk(form: { message: string }): Promise<void> {
             await this.$store.dispatch(new SayGroupAction(this.id, form.message));
+        },
+        onSelected(entry: FeedEntry): void {
+            console.log("selected", entry);
         },
     },
 });
