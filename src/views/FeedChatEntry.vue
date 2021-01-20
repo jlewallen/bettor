@@ -35,9 +35,7 @@ export default Vue.extend({
         },
         myself(): boolean {
             const self = this.$store.state.self;
-            if (!self) {
-                return false;
-            }
+            if (!self) throw new Error(`no self`);
             return this.entry.message.author!.id == self.id;
         },
     },
