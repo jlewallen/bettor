@@ -23,10 +23,10 @@ export type Scalars = {
 export type Query = {
   __typename?: 'Query';
   myself?: Maybe<User>;
-  groups?: Maybe<Array<Maybe<Group>>>;
-  bets?: Maybe<Array<Maybe<Bet>>>;
-  groupChat?: Maybe<Array<Maybe<GroupChat>>>;
-  betChat?: Maybe<Array<Maybe<BetChat>>>;
+  groups?: Maybe<Array<Group>>;
+  bets?: Maybe<Array<Bet>>;
+  groupChat?: Maybe<Array<GroupChat>>;
+  betChat?: Maybe<Array<BetChat>>;
 };
 
 
@@ -327,10 +327,10 @@ export type LoadGroupQueryVariables = Exact<{
 
 export type LoadGroupQuery = (
   { __typename?: 'Query' }
-  & { groups?: Maybe<Array<Maybe<(
+  & { groups?: Maybe<Array<(
     { __typename?: 'Group' }
     & GroupFieldsFragment
-  )>>> }
+  )>> }
 );
 
 export type GroupFieldsFragment = (
@@ -377,13 +377,43 @@ export type QueryGroupsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type QueryGroupsQuery = (
   { __typename?: 'Query' }
-  & { groups?: Maybe<Array<Maybe<(
+  & { groups?: Maybe<Array<(
     { __typename?: 'Group' }
     & Pick<Group, 'id' | 'name' | 'activityAt' | 'picture'>
     & { owner?: Maybe<(
       { __typename?: 'User' }
       & UserRefFragment
     )> }
+  )>> }
+);
+
+export type QueriedGroupFieldsFragment = (
+  { __typename?: 'Group' }
+  & Pick<Group, 'id' | 'name' | 'activityAt' | 'picture'>
+  & { owner?: Maybe<(
+    { __typename?: 'User' }
+    & UserRefFragment
+  )>, members?: Maybe<Array<Maybe<(
+    { __typename?: 'User' }
+    & UserRefFragment
+  )>>>, allBets?: Maybe<Array<Maybe<(
+    { __typename?: 'Bet' }
+    & Pick<Bet, 'id' | 'title' | 'details' | 'createdAt' | 'expiresAt' | 'activityAt' | 'state'>
+    & { author?: Maybe<(
+      { __typename?: 'User' }
+      & UserRefFragment
+    )>, positions?: Maybe<Array<Maybe<(
+      { __typename?: 'Position' }
+      & Pick<Position, 'title'>
+      & { userPositions?: Maybe<Array<Maybe<(
+        { __typename?: 'UserPosition' }
+        & Pick<UserPosition, 'createdAt' | 'state'>
+        & { user?: Maybe<(
+          { __typename?: 'User' }
+          & UserRefFragment
+        )> }
+      )>>> }
+    )>>> }
   )>>> }
 );
 
@@ -394,35 +424,10 @@ export type QueryGroupQueryVariables = Exact<{
 
 export type QueryGroupQuery = (
   { __typename?: 'Query' }
-  & { groups?: Maybe<Array<Maybe<(
+  & { groups?: Maybe<Array<(
     { __typename?: 'Group' }
-    & Pick<Group, 'id' | 'name' | 'activityAt' | 'picture'>
-    & { owner?: Maybe<(
-      { __typename?: 'User' }
-      & UserRefFragment
-    )>, members?: Maybe<Array<Maybe<(
-      { __typename?: 'User' }
-      & UserRefFragment
-    )>>>, allBets?: Maybe<Array<Maybe<(
-      { __typename?: 'Bet' }
-      & Pick<Bet, 'id' | 'title' | 'details' | 'createdAt' | 'expiresAt' | 'activityAt' | 'state'>
-      & { author?: Maybe<(
-        { __typename?: 'User' }
-        & UserRefFragment
-      )>, positions?: Maybe<Array<Maybe<(
-        { __typename?: 'Position' }
-        & Pick<Position, 'title'>
-        & { userPositions?: Maybe<Array<Maybe<(
-          { __typename?: 'UserPosition' }
-          & Pick<UserPosition, 'createdAt' | 'state'>
-          & { user?: Maybe<(
-            { __typename?: 'User' }
-            & UserRefFragment
-          )> }
-        )>>> }
-      )>>> }
-    )>>> }
-  )>>> }
+    & QueriedGroupFieldsFragment
+  )>> }
 );
 
 export type GroupChatMessageFieldsFragment = (
@@ -442,10 +447,10 @@ export type QueryGroupChatQueryVariables = Exact<{
 
 export type QueryGroupChatQuery = (
   { __typename?: 'Query' }
-  & { groupChat?: Maybe<Array<Maybe<(
+  & { groupChat?: Maybe<Array<(
     { __typename?: 'GroupChat' }
     & GroupChatMessageFieldsFragment
-  )>>> }
+  )>> }
 );
 
 export type BetChatMessageFieldsFragment = (
@@ -465,10 +470,10 @@ export type QueryBetChatQueryVariables = Exact<{
 
 export type QueryBetChatQuery = (
   { __typename?: 'Query' }
-  & { betChat?: Maybe<Array<Maybe<(
+  & { betChat?: Maybe<Array<(
     { __typename?: 'BetChat' }
     & BetChatMessageFieldsFragment
-  )>>> }
+  )>> }
 );
 
 export const GroupFieldsFragmentDoc = gql`
@@ -484,6 +489,42 @@ export const UserRefFragmentDoc = gql`
   picture
 }
     `;
+export const QueriedGroupFieldsFragmentDoc = gql`
+    fragment QueriedGroupFields on Group {
+  id
+  owner {
+    ...UserRef
+  }
+  name
+  activityAt
+  picture
+  members {
+    ...UserRef
+  }
+  allBets {
+    id
+    title
+    details
+    createdAt
+    expiresAt
+    activityAt
+    state
+    author {
+      ...UserRef
+    }
+    positions {
+      title
+      userPositions {
+        user {
+          ...UserRef
+        }
+        createdAt
+        state
+      }
+    }
+  }
+}
+    ${UserRefFragmentDoc}`;
 export const GroupChatMessageFieldsFragmentDoc = gql`
     fragment GroupChatMessageFields on GroupChat {
   id
@@ -544,41 +585,10 @@ export const QueryGroupsDocument = gql`
 export const QueryGroupDocument = gql`
     query queryGroup($groupId: Int!) {
   groups(groupId: $groupId) {
-    id
-    owner {
-      ...UserRef
-    }
-    name
-    activityAt
-    picture
-    members {
-      ...UserRef
-    }
-    allBets {
-      id
-      title
-      details
-      createdAt
-      expiresAt
-      activityAt
-      state
-      author {
-        ...UserRef
-      }
-      positions {
-        title
-        userPositions {
-          user {
-            ...UserRef
-          }
-          createdAt
-          state
-        }
-      }
-    }
+    ...QueriedGroupFields
   }
 }
-    ${UserRefFragmentDoc}`;
+    ${QueriedGroupFieldsFragmentDoc}`;
 export const QueryGroupChatDocument = gql`
     query queryGroupChat($groupId: Int!, $page: Int!) {
   groupChat(groupId: $groupId, page: $page) {

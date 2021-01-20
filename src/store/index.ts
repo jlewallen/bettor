@@ -5,6 +5,8 @@ import { createLogger } from "vuex";
 
 import { authenticated, Group, Bet, LoginPerson, getApi } from "../http";
 
+import { QueriedGroupFieldsFragment } from "../http";
+
 export { authenticated, Group, Bet, LoginPerson };
 
 export enum MutationTypes {
@@ -42,8 +44,10 @@ export class State {
 }
 
 export class Feed {
-    constructor(public readonly group: string, public readonly chat: any) {}
+    constructor(public readonly group: QueriedGroupFieldsFragment, public readonly chat: any) {}
 }
+
+// type QueriedGroup = QueriedGroupFields["user"]["profile"]["name"]["first"];
 
 Vue.use(Vuex);
 
@@ -59,7 +63,7 @@ export default new Vuex.Store({
     },
     actions: {
         [ActionTypes.LOAD_USER]: async ({ commit }) => {
-            const api = await getApi();
+            const api = getApi();
 
             let groups = await api.queryGroups();
             if (groups && groups.groups && groups.groups.length == 0) {
@@ -70,17 +74,19 @@ export default new Vuex.Store({
             commit(MutationTypes.REFRESH_GROUPS, groups.groups);
         },
         [ActionTypes.LOAD_GROUP]: async ({ commit, dispatch }, payload: LoadGroupAction) => {
-            const api = await getApi();
+            const api = getApi();
             await dispatch(ActionTypes.LOAD_USER);
 
             const groups = await api.queryGroup(payload);
             const chats = await api.queryGroupChat({ groupId: payload.groupId, page: 0 });
 
-            if (groups && chats && groups.groups) {
-                console.log(groups.groups[0]);
-                console.log(chats);
-
-                new Feed(groups.groups[0], chats);
+            if (groups && chats && groups.groups && groups.groups.length == 1) {
+                const group = groups.groups[0];
+                if (group) {
+                    console.log(group);
+                    console.log(chats);
+                    new Feed(group, chats);
+                }
             }
         },
         [ActionTypes.SAY_GROUP]: async ({ commit, dispatch }, payload: SayGroupAction) => {

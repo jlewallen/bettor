@@ -40,8 +40,7 @@ query queryGroups {
 	}
 }
 
-query queryGroup($groupId: Int!) {
-	groups(groupId: $groupId) {
+fragment QueriedGroupFields on Group {
 		id
 		owner {
 			...UserRef
@@ -74,9 +73,13 @@ query queryGroup($groupId: Int!) {
 				}
 			}
 		}
-	}
 }
 
+query queryGroup($groupId: Int!) {
+	groups(groupId: $groupId) {
+		...QueriedGroupFields
+	}
+}
 
 fragment GroupChatMessageFields on GroupChat {
 	id createdAt message author { ...UserRef }

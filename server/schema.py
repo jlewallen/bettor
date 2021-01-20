@@ -55,18 +55,18 @@ class BetChat(ActiveSQLAlchemyObjectType):
 class Query(graphene.ObjectType):
     myself = graphene.Field(User)
     groups = graphene.List(
-        Group, group_id=graphene.Argument(type=graphene.Int, required=False)
+        graphene.NonNull(Group), group_id=graphene.Argument(type=graphene.Int, required=False)
     )
     bets = graphene.List(
-        Bet, bet_id=graphene.Argument(type=graphene.Int, required=False)
+        graphene.NonNull(Bet), bet_id=graphene.Argument(type=graphene.Int, required=False)
     )
     group_chat = graphene.List(
-        GroupChat,
+        graphene.NonNull(GroupChat),
         group_id=graphene.Argument(type=graphene.Int, required=True),
         page=graphene.Argument(type=graphene.Int, required=True),
     )
     bet_chat = graphene.List(
-        BetChat,
+        graphene.NonNull(BetChat),
         bet_id=graphene.Argument(type=graphene.Int, required=True),
         page=graphene.Argument(type=graphene.Int, required=True),
     )

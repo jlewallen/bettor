@@ -68,6 +68,7 @@ def create_app():
 
     @app.route("/v1/graphql", methods=["GET"])
     async def introspection():
+        print(str(g))
         return {"data": g.introspect()}
 
     @app.route("/v1/graphql", methods=["POST"])
