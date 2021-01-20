@@ -16,6 +16,25 @@ export function authenticated(): boolean {
     return window.localStorage["bettor:headers"] != null;
 }
 
+import { GraphQLClient } from "graphql-request";
+import { getSdk } from "@/generated/graphql";
+
+/*
+import { ApolloClient, InMemoryCache, gql } from "@apollo/client/core";
+
+const apollo = new ApolloClient({
+    uri: "http://127.0.0.1:5000/v1/graphql",
+    cache: new InMemoryCache(),
+});
+*/
+
+export function getApi() {
+    const gqlc = new GraphQLClient("http://127.0.0.1:5000/v1/graphql", {
+        headers: getAuthHeaders(),
+    });
+    return getSdk(gqlc);
+}
+
 export interface OurRequestInfo {
     url: string;
     method?: string;

@@ -1,0 +1,23 @@
+query loadGroup($groupId: Int) {
+	groups(groupId: $groupId) {
+		...GroupFields
+	}
+}
+
+fragment GroupFields on Group {
+	id
+	name
+}
+
+mutation createExamples {
+	createExamples {
+		ok
+	}
+}
+
+mutation sayGroupChat($groupId: Int!, $message: String) {
+	sayGroupChat(payload: { groupId: $groupId, message: $message }) {
+		message { id }
+		ok
+	}
+}

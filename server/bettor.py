@@ -66,12 +66,17 @@ def create_app():
             return user
         quart.abort(401)
 
+    @app.route("/v1/graphql", methods=["GET"])
+    async def introspection():
+        return {"data": g.introspect()}
+
     @app.route("/v1/graphql", methods=["POST"])
     async def graphql():
         user = authenticate()
         body = await quart.request.get_json()
+        variables = body["variables"] if "variables" in body else None
         context = {"session": storage.create, "user": user}
-        res = g.execute(body["query"], context_value=context)
+        res = g.execute(body["query"], context_value=context, variables=variables)
         return res.to_dict()
 
     @app.route("/v1/login", methods=["GET"])
