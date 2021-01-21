@@ -4,6 +4,9 @@
         <div class="feed-body">
             <p class="message">
                 {{ entry.message.message }}
+                <span class="time">
+                    {{ prettyTime(entry.message.createdAt) }}
+                </span>
             </p>
         </div>
     </div>
@@ -31,7 +34,7 @@ export default Vue.extend({
             this.$emit("tap");
         },
         prettyTime(date: Date): string {
-            return moment(date).format("YYYY/MM/DD h:mm:ss");
+            return moment(date).format("h:mm:ss");
         },
         myself(): boolean {
             const self = this.$store.state.self;
@@ -42,7 +45,7 @@ export default Vue.extend({
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .author {
     font-size: 14pt;
 }
@@ -51,5 +54,15 @@ export default Vue.extend({
 }
 .time {
     font-size: 8pt;
+    color: #808080;
+}
+
+p {
+    padding: 8px 10px 8px 10px;
+    background: #efefaf;
+    word-wrap: break-word;
+    font-family: Monospace;
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 </style>

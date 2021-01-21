@@ -4,6 +4,8 @@ from sqlalchemy.orm import relationship
 
 import datetime
 import enum
+import lorem
+import random
 
 from storage import Base
 
@@ -54,7 +56,7 @@ class User(Base):
         return "<User(id='%s', name='%s', picture='%s')>" % (
             self.id,
             self.name,
-            self.picture
+            self.picture,
         )
 
 
@@ -94,7 +96,7 @@ class Group(Base):
         return "<Group(id='%s', name='%s', picture='%s')>" % (
             self.id,
             self.name,
-            self.picture
+            self.picture,
         )
 
 
@@ -159,10 +161,6 @@ class Bet(Base):
         "User", secondary=bet_watchers, back_populates="watched_bets"
     )
 
-    @property
-    def expired(self) -> bool:
-        return False
-
     def touch(self):
         self.activity_at = datetime.datetime.utcnow()
         assert self.group
@@ -182,7 +180,7 @@ class Bet(Base):
         assert title
         assert author
         details = details if details else title
-        myself = Position(title="Myself", minimum=1, maximum=1)
+        myself = Position(title="Bettor", minimum=1, maximum=1)
         takers = Position(title="Takers", minimum=minimum, maximum=maximum)
         myself.take(author)
         return Bet(
@@ -206,7 +204,24 @@ class Bet(Base):
             **kwargs
         )
 
+    def is_expired(self) -> bool:
+        return datetime.datetime.utcnow() > self.expires_at
+
+    def can_take(self, user: User) -> bool:
+        if self.state == BetState.CANCELLED:
+            return False
+        if self.has_position(user):
+            return False
+        return len([p for p in self.positions if p.is_open()]) > 0
+
+    def can_cancel(self, user: User) -> bool:
+        if self.author.id == user.id:
+            return self.state != BetState.CANCELLED
+        return self.has_position(user)
+
     def take(self, user: User, position: str = None):
+        if self.state == BetState.CANCELLED:
+            raise Exception("cancelled")
         if user in self.users_with_positions():
             raise Exception("already taken")
         for p in self.positions:
@@ -222,6 +237,8 @@ class Bet(Base):
                         self.watchers.append(user)
 
     def cancel(self, user: User):
+        if self.state == BetState.CANCELLED:
+            raise Exception("cancelled")
         self.position_by_user(user).cancel(user)
         if self.author == user:
             self.state = BetState.CANCELLED
@@ -235,6 +252,9 @@ class Bet(Base):
 
     def users_with_positions(self) -> List[User]:
         return flatten([p.valid_users() for p in self.positions])
+
+    def has_position(self, user: User) -> bool:
+        return user in self.users_with_positions()
 
     def __repr__(self):
         return "<Bet(id='%s', state='%s', title='%s')>" % (
@@ -321,12 +341,21 @@ def flatten(l):
 
 
 def create_examples():
-    jacob = User(sub="", name="Jacob", email="jlewalle@gmail.com", picture="https://lh3.googleusercontent.com/a-/AOh14Gjl9_87qIin3U2czS8qz9frvvSLvEkKoBwQfcvRcg=s96-c")
+    jacob = User(
+        sub="",
+        name="Jacob",
+        email="jlewalle@gmail.com",
+        picture="https://lh3.googleusercontent.com/a-/AOh14Gjl9_87qIin3U2czS8qz9frvvSLvEkKoBwQfcvRcg=s96-c",
+    )
     stephen = User(sub="", name="Stephen", email="stephen@example.com")
     jimmy = User(sub="", name="Jimmy", email="jimmy@example.com")
     derek = User(sub="", name="Derek", email="derek@example.com")
     zack = User(sub="", name="Zack", email="zack@example.com")
     scott = User(sub="", name="Scott", email="scott@example.com")
+
+    standard_expiration = datetime.timedelta(minutes=60)
+    group_epoch = datetime.datetime.utcnow()
+    bet_time = group_epoch
 
     group = Group(
         name="Small Group",
@@ -334,30 +363,48 @@ def create_examples():
         members=[jacob, stephen, jimmy, derek, zack, scott],
     )
 
-    standard_expiration = datetime.timedelta(minutes=60)
+    bet_time += datetime.timedelta(seconds=random.randrange(30, 60))
+
     simple = Bet.coin_toss(
+        created_at=bet_time,
         group=group,
         author=jacob,
-        expires_at=datetime.datetime.utcnow() + standard_expiration,
+        expires_at=bet_time + standard_expiration,
     )
     simple.take(jacob, position="heads")
     simple.take(stephen, position="tails")
 
+    bet_time += datetime.timedelta(seconds=random.randrange(30, 60))
+
     jimmy_example = Bet.arbitrary(
+        created_at=bet_time,
         title="Derrick Henry over 35 receptions",
         group=group,
         author=stephen,
-        expires_at=datetime.datetime.utcnow() + standard_expiration,
+        expires_at=group_epoch + standard_expiration,
     )
     jimmy_example.take(jimmy)
 
+    bet_time += datetime.timedelta(seconds=random.randrange(30, 60))
+
     multiple_takers = Bet.arbitrary(
+        created_at=bet_time,
         group=group,
         title="Daniel Jones has more fantasy points than Tom Brady at season end.",
         author=stephen,
-        expires_at=datetime.datetime.utcnow() + standard_expiration,
+        expires_at=group_epoch + standard_expiration,
     )
     multiple_takers.take(derek)
     multiple_takers.take(scott)
+
+    chat_time = group_epoch - datetime.timedelta(seconds=200)
+    for i in range(0, 10):
+        for j in range(0, 2):
+            user = random.choice(group.members)
+            message = GroupChat(
+                group=group, message=lorem.sentence(), author=user, created_at=chat_time
+            )
+            group.messages.append(message)
+            chat_time += datetime.timedelta(seconds=random.randrange(30, 60))
 
     return group

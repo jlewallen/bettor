@@ -9,11 +9,11 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import Vue, { PropType } from "vue";
 import Feed from "./Feed.vue";
 import ChatMessage from "./ChatMessage.vue";
 
-import { authenticated, LoadGroupAction, SayGroupAction, Group, Feed as FeedModel, FeedEntry, UserRefFragment } from "@/store";
+import { authenticated, ID, LoadGroupAction, SayGroupAction, Group, Feed as FeedModel, FeedEntry, UserRefFragment } from "@/store";
 
 export default Vue.extend({
     name: "Group",
@@ -23,7 +23,7 @@ export default Vue.extend({
     },
     props: {
         id: {
-            type: Number,
+            type: String, // ID
             required: true,
         },
     },

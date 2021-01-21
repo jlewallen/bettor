@@ -34,7 +34,7 @@ const routes: Array<RouteConfig> = [
         component: Group,
         props: (route) => {
             return {
-                id: Number(route.params.id),
+                id: route.params.id,
             };
         },
     },

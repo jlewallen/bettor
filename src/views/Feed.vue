@@ -1,7 +1,7 @@
 <template>
     <div class="feed">
         <template v-for="entry in feed.entries">
-            <component v-bind:is="entryFor(entry)" :entry="entry" @tap="raiseSelected(entry)" v-bind:key="entry.id" />
+            <component v-bind:is="entryFor(entry)" :entry="entry" @tap="raiseSelected(entry)" v-bind:key="entry.key" />
         </template>
     </div>
 </template>
@@ -67,9 +67,8 @@ export default Vue.extend({
         text-align: left;
 
         &.me {
-            & img.feed-photo {
+            & .feed-photo {
                 order: 2;
-                margin: 0 0 0 3px;
             }
 
             & div.feed-body {
@@ -97,16 +96,9 @@ export default Vue.extend({
             }
         }
 
-        & img.feed-photo {
-            display: block;
+        & .feed-photo {
             order: 1;
-            margin: 0 10px 0 0;
-            height: 30px;
-            width: 30px;
-            border-radius: 50%;
-            box-sizing: border-box;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
+            margin-top: 0;
         }
 
         & div.feed-body {
@@ -120,12 +112,6 @@ export default Vue.extend({
                 display: inline-block;
                 margin: 0;
                 width: auto;
-                padding: 8px 10px 8px 10px;
-                background: #efefaf;
-                word-wrap: break-word;
-                font-family: Monospace;
-                border-radius: 3px;
-                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             }
 
             /*

@@ -37,7 +37,7 @@ class BetAttribute:
     title = graphene.String(required=True)
     details = graphene.String(required=True)
     expires_in = graphene.Int(required=True)
-    group_id = graphene.Int(required=True)
+    group_id = graphene.ID(required=True)
     arbitrary = graphene.Boolean()
 
 
@@ -78,7 +78,7 @@ class CreateExamples(graphene.Mutation):
 
 
 class PositionAttributes:
-    bet_id = graphene.Int(required=True)
+    bet_id = graphene.ID(required=True)
     position = graphene.String()
 
 
@@ -119,7 +119,7 @@ class CancelPosition(graphene.Mutation):
 
 
 class GroupChatAttributes:
-    group_id = graphene.Int(required=True)
+    group_id = graphene.ID(required=True)
     message = graphene.String()
 
 
@@ -146,7 +146,7 @@ class SayGroupChat(graphene.Mutation):
 
 
 class BetChatAttributes:
-    bet_id = graphene.Int(required=True)
+    bet_id = graphene.ID(required=True)
     message = graphene.String()
 
 
@@ -173,7 +173,7 @@ class SayBetChat(graphene.Mutation):
 
 
 class CancelBetAttributes:
-    bet_id = graphene.Int(required=True)
+    bet_id = graphene.ID(required=True)
 
 
 class CancelBetPayload(graphene.InputObjectType, CancelBetAttributes):
@@ -181,6 +181,7 @@ class CancelBetPayload(graphene.InputObjectType, CancelBetAttributes):
 
 
 class CancelBet(graphene.Mutation):
+    bet = graphene.Field(schema.Bet)
     ok = graphene.Boolean()
 
     class Arguments:
@@ -193,11 +194,11 @@ class CancelBet(graphene.Mutation):
         bet.cancel(user)
         bet.touch()
         session.commit()
-        return CancelBet(ok=True)
+        return CancelBet(bet=bet, ok=True)
 
 
 class InviteAttributes:
-    group_id = graphene.Int(required=True)
+    group_id = graphene.ID(required=True)
     email = graphene.String(required=True)
 
 
@@ -226,8 +227,8 @@ class Invite(graphene.Mutation):
 
 
 class RemoveAttributes:
-    group_id = graphene.Int(required=True)
-    user_id = graphene.Int(required=True)
+    group_id = graphene.ID(required=True)
+    user_id = graphene.ID(required=True)
 
 
 class RemovePayload(graphene.InputObjectType, RemoveAttributes):

@@ -31,23 +31,23 @@ export type Query = {
 
 
 export type QueryGroupsArgs = {
-  groupId?: Maybe<Scalars['Int']>;
+  groupId?: Maybe<Scalars['ID']>;
 };
 
 
 export type QueryBetsArgs = {
-  betId?: Maybe<Scalars['Int']>;
+  betId?: Maybe<Scalars['ID']>;
 };
 
 
 export type QueryGroupChatArgs = {
-  groupId: Scalars['Int'];
+  groupId: Scalars['ID'];
   page: Scalars['Int'];
 };
 
 
 export type QueryBetChatArgs = {
-  betId: Scalars['Int'];
+  betId: Scalars['ID'];
   page: Scalars['Int'];
 };
 
@@ -100,7 +100,9 @@ export type Bet = {
   positions?: Maybe<Array<Maybe<Position>>>;
   messages?: Maybe<Array<Maybe<BetChat>>>;
   watchers?: Maybe<Array<Maybe<User>>>;
-  expired?: Maybe<Scalars['Boolean']>;
+  expired: Scalars['Boolean'];
+  canTake: Scalars['Boolean'];
+  canCancel: Scalars['Boolean'];
 };
 
 /** An enumeration. */
@@ -243,7 +245,7 @@ export type CreateBetPayload = {
   title: Scalars['String'];
   details: Scalars['String'];
   expiresIn: Scalars['Int'];
-  groupId: Scalars['Int'];
+  groupId: Scalars['ID'];
   arbitrary?: Maybe<Scalars['Boolean']>;
 };
 
@@ -259,7 +261,7 @@ export type TakePosition = {
 };
 
 export type PositionPayload = {
-  betId: Scalars['Int'];
+  betId: Scalars['ID'];
   position?: Maybe<Scalars['String']>;
 };
 
@@ -276,7 +278,7 @@ export type SayGroupChat = {
 };
 
 export type GroupChatPayload = {
-  groupId: Scalars['Int'];
+  groupId: Scalars['ID'];
   message?: Maybe<Scalars['String']>;
 };
 
@@ -287,17 +289,18 @@ export type SayBetChat = {
 };
 
 export type BetChatPayload = {
-  betId: Scalars['Int'];
+  betId: Scalars['ID'];
   message?: Maybe<Scalars['String']>;
 };
 
 export type CancelBet = {
   __typename?: 'CancelBet';
+  bet?: Maybe<Bet>;
   ok?: Maybe<Scalars['Boolean']>;
 };
 
 export type CancelBetPayload = {
-  betId: Scalars['Int'];
+  betId: Scalars['ID'];
 };
 
 export type Invite = {
@@ -306,7 +309,7 @@ export type Invite = {
 };
 
 export type InvitePayload = {
-  groupId: Scalars['Int'];
+  groupId: Scalars['ID'];
   email: Scalars['String'];
 };
 
@@ -316,8 +319,8 @@ export type Remove = {
 };
 
 export type RemovePayload = {
-  groupId: Scalars['Int'];
-  userId: Scalars['Int'];
+  groupId: Scalars['ID'];
+  userId: Scalars['ID'];
 };
 
 export type GroupFieldsFragment = (
@@ -326,7 +329,7 @@ export type GroupFieldsFragment = (
 );
 
 export type LoadGroupQueryVariables = Exact<{
-  groupId?: Maybe<Scalars['Int']>;
+  groupId?: Maybe<Scalars['ID']>;
 }>;
 
 
@@ -376,8 +379,11 @@ export type QueryGroupsQuery = (
 
 export type QueriedBetFieldsFragment = (
   { __typename?: 'Bet' }
-  & Pick<Bet, 'id' | 'title' | 'details' | 'createdAt' | 'expiresAt' | 'activityAt' | 'state'>
-  & { author?: Maybe<(
+  & Pick<Bet, 'id' | 'title' | 'details' | 'createdAt' | 'expiresAt' | 'expired' | 'canTake' | 'canCancel' | 'activityAt' | 'state'>
+  & { group?: Maybe<(
+    { __typename?: 'Group' }
+    & Pick<Group, 'id'>
+  )>, author?: Maybe<(
     { __typename?: 'User' }
     & UserRefFragment
   )>, positions?: Maybe<Array<Maybe<(
@@ -410,7 +416,7 @@ export type QueriedGroupFieldsFragment = (
 );
 
 export type QueryGroupQueryVariables = Exact<{
-  groupId: Scalars['Int'];
+  groupId: Scalars['ID'];
 }>;
 
 
@@ -432,7 +438,7 @@ export type GroupChatMessageFieldsFragment = (
 );
 
 export type QueryGroupChatQueryVariables = Exact<{
-  groupId: Scalars['Int'];
+  groupId: Scalars['ID'];
   page: Scalars['Int'];
 }>;
 
@@ -455,7 +461,7 @@ export type BetChatMessageFieldsFragment = (
 );
 
 export type QueryBetChatQueryVariables = Exact<{
-  betId: Scalars['Int'];
+  betId: Scalars['ID'];
   page: Scalars['Int'];
 }>;
 
@@ -480,7 +486,7 @@ export type QuerySelfQuery = (
 );
 
 export type SayGroupChatMutationVariables = Exact<{
-  groupId: Scalars['Int'];
+  groupId: Scalars['ID'];
   message?: Maybe<Scalars['String']>;
 }>;
 
@@ -498,7 +504,7 @@ export type SayGroupChatMutation = (
 );
 
 export type SayBetChatMutationVariables = Exact<{
-  betId: Scalars['Int'];
+  betId: Scalars['ID'];
   message?: Maybe<Scalars['String']>;
 }>;
 
@@ -511,6 +517,79 @@ export type SayBetChatMutation = (
     & { message?: Maybe<(
       { __typename?: 'BetChat' }
       & BetChatMessageFieldsFragment
+    )> }
+  )> }
+);
+
+export type CreateBetMutationVariables = Exact<{
+  groupId: Scalars['ID'];
+  title: Scalars['String'];
+  expiresIn: Scalars['Int'];
+  details: Scalars['String'];
+}>;
+
+
+export type CreateBetMutation = (
+  { __typename?: 'Mutation' }
+  & { createBet?: Maybe<(
+    { __typename?: 'CreateBet' }
+    & Pick<CreateBet, 'ok'>
+    & { bet?: Maybe<(
+      { __typename?: 'Bet' }
+      & QueriedBetFieldsFragment
+    )> }
+  )> }
+);
+
+export type TakePositionMutationVariables = Exact<{
+  betId: Scalars['ID'];
+  position?: Maybe<Scalars['String']>;
+}>;
+
+
+export type TakePositionMutation = (
+  { __typename?: 'Mutation' }
+  & { takePosition?: Maybe<(
+    { __typename?: 'TakePosition' }
+    & Pick<TakePosition, 'ok'>
+    & { bet?: Maybe<(
+      { __typename?: 'Bet' }
+      & QueriedBetFieldsFragment
+    )> }
+  )> }
+);
+
+export type CancelPositionMutationVariables = Exact<{
+  betId: Scalars['ID'];
+  position?: Maybe<Scalars['String']>;
+}>;
+
+
+export type CancelPositionMutation = (
+  { __typename?: 'Mutation' }
+  & { cancelPosition?: Maybe<(
+    { __typename?: 'CancelPosition' }
+    & Pick<CancelPosition, 'ok'>
+    & { bet?: Maybe<(
+      { __typename?: 'Bet' }
+      & QueriedBetFieldsFragment
+    )> }
+  )> }
+);
+
+export type CancelBetMutationVariables = Exact<{
+  betId: Scalars['ID'];
+}>;
+
+
+export type CancelBetMutation = (
+  { __typename?: 'Mutation' }
+  & { cancelBet?: Maybe<(
+    { __typename?: 'CancelBet' }
+    & Pick<CancelBet, 'ok'>
+    & { bet?: Maybe<(
+      { __typename?: 'Bet' }
+      & QueriedBetFieldsFragment
     )> }
   )> }
 );
@@ -548,8 +627,14 @@ export const QueriedBetFieldsFragmentDoc = gql`
   details
   createdAt
   expiresAt
+  expired
+  canTake
+  canCancel
   activityAt
   state
+  group {
+    id
+  }
   author {
     ...UserRef
   }
@@ -604,7 +689,7 @@ export const BetChatMessageFieldsFragmentDoc = gql`
 }
     ${UserRefFragmentDoc}`;
 export const LoadGroupDocument = gql`
-    query loadGroup($groupId: Int) {
+    query loadGroup($groupId: ID) {
   groups(groupId: $groupId) {
     ...GroupFields
   }
@@ -625,21 +710,21 @@ export const QueryGroupsDocument = gql`
 }
     ${ListedGroupFieldsFragmentDoc}`;
 export const QueryGroupDocument = gql`
-    query queryGroup($groupId: Int!) {
+    query queryGroup($groupId: ID!) {
   groups(groupId: $groupId) {
     ...QueriedGroupFields
   }
 }
     ${QueriedGroupFieldsFragmentDoc}`;
 export const QueryGroupChatDocument = gql`
-    query queryGroupChat($groupId: Int!, $page: Int!) {
+    query queryGroupChat($groupId: ID!, $page: Int!) {
   groupChat(groupId: $groupId, page: $page) {
     ...GroupChatMessageFields
   }
 }
     ${GroupChatMessageFieldsFragmentDoc}`;
 export const QueryBetChatDocument = gql`
-    query queryBetChat($betId: Int!, $page: Int!) {
+    query queryBetChat($betId: ID!, $page: Int!) {
   betChat(betId: $betId, page: $page) {
     ...BetChatMessageFields
   }
@@ -653,25 +738,67 @@ export const QuerySelfDocument = gql`
 }
     ${UserRefFragmentDoc}`;
 export const SayGroupChatDocument = gql`
-    mutation sayGroupChat($groupId: Int!, $message: String) {
+    mutation sayGroupChat($groupId: ID!, $message: String) {
   sayGroupChat(payload: {groupId: $groupId, message: $message}) {
+    ok
     message {
       ...GroupChatMessageFields
     }
-    ok
   }
 }
     ${GroupChatMessageFieldsFragmentDoc}`;
 export const SayBetChatDocument = gql`
-    mutation sayBetChat($betId: Int!, $message: String) {
+    mutation sayBetChat($betId: ID!, $message: String) {
   sayBetChat(payload: {betId: $betId, message: $message}) {
+    ok
     message {
       ...BetChatMessageFields
     }
-    ok
   }
 }
     ${BetChatMessageFieldsFragmentDoc}`;
+export const CreateBetDocument = gql`
+    mutation createBet($groupId: ID!, $title: String!, $expiresIn: Int!, $details: String!) {
+  createBet(
+    payload: {groupId: $groupId, title: $title, expiresIn: $expiresIn, details: $details}
+  ) {
+    ok
+    bet {
+      ...QueriedBetFields
+    }
+  }
+}
+    ${QueriedBetFieldsFragmentDoc}`;
+export const TakePositionDocument = gql`
+    mutation takePosition($betId: ID!, $position: String) {
+  takePosition(payload: {betId: $betId, position: $position}) {
+    ok
+    bet {
+      ...QueriedBetFields
+    }
+  }
+}
+    ${QueriedBetFieldsFragmentDoc}`;
+export const CancelPositionDocument = gql`
+    mutation cancelPosition($betId: ID!, $position: String) {
+  cancelPosition(payload: {betId: $betId, position: $position}) {
+    ok
+    bet {
+      ...QueriedBetFields
+    }
+  }
+}
+    ${QueriedBetFieldsFragmentDoc}`;
+export const CancelBetDocument = gql`
+    mutation cancelBet($betId: ID!) {
+  cancelBet(payload: {betId: $betId}) {
+    ok
+    bet {
+      ...QueriedBetFields
+    }
+  }
+}
+    ${QueriedBetFieldsFragmentDoc}`;
 
 export type SdkFunctionWrapper = <T>(action: () => Promise<T>) => Promise<T>;
 
@@ -705,6 +832,18 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     sayBetChat(variables: SayBetChatMutationVariables, requestHeaders?: Headers): Promise<SayBetChatMutation> {
       return withWrapper(() => client.request<SayBetChatMutation>(print(SayBetChatDocument), variables, requestHeaders));
+    },
+    createBet(variables: CreateBetMutationVariables, requestHeaders?: Headers): Promise<CreateBetMutation> {
+      return withWrapper(() => client.request<CreateBetMutation>(print(CreateBetDocument), variables, requestHeaders));
+    },
+    takePosition(variables: TakePositionMutationVariables, requestHeaders?: Headers): Promise<TakePositionMutation> {
+      return withWrapper(() => client.request<TakePositionMutation>(print(TakePositionDocument), variables, requestHeaders));
+    },
+    cancelPosition(variables: CancelPositionMutationVariables, requestHeaders?: Headers): Promise<CancelPositionMutation> {
+      return withWrapper(() => client.request<CancelPositionMutation>(print(CancelPositionDocument), variables, requestHeaders));
+    },
+    cancelBet(variables: CancelBetMutationVariables, requestHeaders?: Headers): Promise<CancelBetMutation> {
+      return withWrapper(() => client.request<CancelBetMutation>(print(CancelBetDocument), variables, requestHeaders));
     }
   };
 }

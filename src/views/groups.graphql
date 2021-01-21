@@ -5,7 +5,7 @@ fragment GroupFields on Group {
   picture
 }
 
-query loadGroup($groupId: Int) {
+query loadGroup($groupId: ID) {
   groups(groupId: $groupId) {
 	...GroupFields
   }
@@ -45,8 +45,14 @@ fragment QueriedBetFields on Bet {
   details
   createdAt
   expiresAt
+  expired
+  canTake
+  canCancel
   activityAt
   state
+  group {
+	id
+  }
   author {
 	...UserRef
   }
@@ -78,7 +84,7 @@ fragment QueriedGroupFields on Group {
   }
 }
 
-query queryGroup($groupId: Int!) {
+query queryGroup($groupId: ID!) {
   groups(groupId: $groupId) {
 	...QueriedGroupFields
   }
@@ -88,7 +94,7 @@ fragment GroupChatMessageFields on GroupChat {
   id createdAt message author { ...UserRef }
 }
 
-query queryGroupChat($groupId: Int!, $page: Int!) {
+query queryGroupChat($groupId: ID!, $page: Int!) {
   groupChat(groupId: $groupId, page: $page) {
 	...GroupChatMessageFields
   }
@@ -98,7 +104,7 @@ fragment BetChatMessageFields on BetChat {
   id createdAt message author { ...UserRef }
 }
 
-query queryBetChat($betId: Int!, $page: Int!) {
+query queryBetChat($betId: ID!, $page: Int!) {
   betChat(betId: $betId, page: $page) {
 	...BetChatMessageFields
   }
@@ -110,20 +116,56 @@ query querySelf {
   }
 }
 
-mutation sayGroupChat($groupId: Int!, $message: String) {
+mutation sayGroupChat($groupId: ID!, $message: String) {
   sayGroupChat(payload: { groupId: $groupId, message: $message }) {
+	ok
 	message {
 	  ...GroupChatMessageFields
 	}
-	ok
   }
 }
 
-mutation sayBetChat($betId: Int!, $message: String) {
+mutation sayBetChat($betId: ID!, $message: String) {
   sayBetChat(payload: { betId: $betId, message: $message }) {
+	ok
 	message {
 	  ...BetChatMessageFields
 	}
+  }
+}
+
+mutation createBet($groupId: ID!, $title: String!, $expiresIn: Int!, $details: String!) {
+  createBet(payload: { groupId: $groupId, title: $title, expiresIn: $expiresIn, details: $details }) {
 	ok
+	bet {
+	  ...QueriedBetFields
+	}
+  }
+}
+
+mutation takePosition($betId: ID!, $position: String) {
+  takePosition(payload: { betId: $betId, position: $position }) {
+	ok
+	bet {
+	  ...QueriedBetFields
+	}
+  }
+}
+
+mutation cancelPosition($betId: ID!, $position: String) {
+  cancelPosition(payload: { betId: $betId, position: $position }) {
+	ok
+	bet {
+	  ...QueriedBetFields
+	}
+  }
+}
+
+mutation cancelBet($betId: ID!) {
+  cancelBet(payload: { betId: $betId }) {
+	ok
+	bet {
+	  ...QueriedBetFields
+	}
   }
 }

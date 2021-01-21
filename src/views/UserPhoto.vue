@@ -1,6 +1,12 @@
 <template>
-    <img v-if="user.picture" :src="user.picture" />
-    <img v-else src="../assets/missing-user.jpg" />
+    <md-avatar v-if="user.picture">
+        <img :src="user.picture" />
+    </md-avatar>
+    <md-avatar v-else>
+        <md-avatar class="md-avatar-icon">{{ user.name[0] }}</md-avatar>
+        <md-avatar class="md-avatar-icon md-primary">{{ user.name[0] }}</md-avatar>
+        <md-avatar class="md-avatar-icon md-accent">{{ user.name[0] }}</md-avatar>
+    </md-avatar>
 </template>
 
 <script lang="ts">
