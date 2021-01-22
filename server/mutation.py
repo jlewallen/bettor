@@ -57,7 +57,7 @@ class CreateBet(graphene.Mutation):
     @staticmethod
     def mutate(self, info, payload):
         user = info.context["user"]
-        expires_in = datetime.timedelta(minutes=payload.expires_in)
+        expires_in = datetime.timedelta(seconds=payload.expires_in)
         bet = models.Bet.arbitrary(
             author=user,
             title=payload.title,

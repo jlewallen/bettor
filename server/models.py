@@ -209,6 +209,8 @@ class Bet(Base):
         return datetime.datetime.utcnow() > self.expires_at
 
     def can_take(self, user: User) -> bool:
+        if self.is_expired():
+            return False
         if self.state == BetState.CANCELLED:
             return False
         if self.has_position(user):
@@ -216,12 +218,18 @@ class Bet(Base):
         return len(self.open_positions()) > 0
 
     def can_cancel(self, user: User) -> bool:
+        if self.is_expired():
+            return False
         if self.author.id == user.id:
             return self.state != BetState.CANCELLED
         return self.has_position(user)
 
     def open_positions(self) -> List["Position"]:
         return [p for p in self.positions if p.is_open()]
+
+    def check_expired(self):
+        if self.is_expired():
+            raise Exception("expired")
 
     def suggested(self, user: User) -> Optional[str]:
         op = self.open_positions()
@@ -230,6 +238,7 @@ class Bet(Base):
         return None
 
     def take(self, user: User, position: str = None):
+        self.check_expired()
         if self.state == BetState.CANCELLED:
             raise Exception("cancelled")
         if user in self.users_with_positions():
@@ -247,6 +256,7 @@ class Bet(Base):
                         self.watchers.append(user)
 
     def cancel(self, user: User):
+        self.check_expired()
         if self.state == BetState.CANCELLED:
             raise Exception("cancelled")
         self.position_by_user(user).cancel(user)

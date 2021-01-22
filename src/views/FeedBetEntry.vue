@@ -135,6 +135,7 @@ export default Vue.extend({
         classObject() {
             return {
                 [this.entry.bet.state.toString().toLowerCase()]: true,
+                expired: this.entry.bet.expired,
             };
         },
     },
@@ -188,6 +189,15 @@ export default Vue.extend({
     .md-card.closed {
         .md-card-header {
             background-color: #9acd32;
+        }
+    }
+
+    .md-card.expired {
+        .md-card-header {
+            background-color: #a0a0a0;
+            .md-title {
+                text-decoration: line-through;
+            }
         }
     }
 
