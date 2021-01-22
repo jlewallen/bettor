@@ -2,12 +2,14 @@
     <div class="entry chat" v-on:click="raiseTap" v-bind:class="{ me: myself() }">
         <UserPhoto :user="entry.message.author" class="feed-photo" />
         <div class="feed-body">
-            <p class="message">
-                {{ entry.message.message }}
+            <div class="bubble">
+                <p class="message">
+                    {{ entry.message.message }}
+                </p>
                 <span class="time">
                     {{ prettyTime(entry.message.createdAt) }}
                 </span>
-            </p>
+            </div>
         </div>
     </div>
 </template>
@@ -64,5 +66,8 @@ p {
     font-family: Monospace;
     border-radius: 3px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.bubble {
+    display: flex;
 }
 </style>

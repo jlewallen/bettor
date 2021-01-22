@@ -18,12 +18,6 @@
         />
         <UserPhoto :user="entry.bet.modifier" class="feed-photo" />
         <div class="feed-body">
-            <p v-if="false">
-                {{ entry.bet.title }}
-                <span class="time">
-                    {{ prettyTime(entry.bet.activityAt) }}
-                </span>
-            </p>
             <div class="bet">
                 <md-card v-bind:class="classObject">
                     <md-card-media v-if="false">
@@ -60,7 +54,7 @@
 
                         <md-card-expand-content>
                             <md-card-content>
-                                <p v-if="false">
+                                <p v-if="entry.bet.details">
                                     {{ entry.bet.details }}
                                 </p>
 

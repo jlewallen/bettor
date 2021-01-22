@@ -76,9 +76,8 @@ export default Vue.extend({
                 padding: 0 8px 0 0;
                 justify-content: flex-end;
 
-                & p {
+                & .bubble {
                     align-self: flex-end;
-                    background: #afefaf;
                 }
                 /*
                 &:before {
@@ -107,7 +106,7 @@ export default Vue.extend({
             flex: 1;
             order: 2;
 
-            & p {
+            & .bubble {
                 align-self: flex-start;
                 display: inline-block;
                 margin: 0;
