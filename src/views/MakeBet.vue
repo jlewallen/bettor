@@ -1,6 +1,6 @@
 <template>
     <div class="">
-        <MakeBetForm :busy="busy" @bet="onBet" @cancel="onCancelBet" />
+        <MakeBetForm :busy="busy" @bet="onMake" @cancel="onCancel" />
     </div>
 </template>
 
@@ -29,7 +29,7 @@ export default Vue.extend({
         };
     },
     methods: {
-        async onBet(bet: CreateBetMutationVariables) {
+        async onMake(bet: CreateBetMutationVariables) {
             this.busy = true;
             try {
                 console.log("onBet", this.id, bet);
@@ -41,8 +41,8 @@ export default Vue.extend({
                 this.busy = false;
             }
         },
-        onCancelBet() {
-            console.log("onCancelBet");
+        onCancel() {
+            console.log("onCancel");
             this.$router.go(-1);
         },
     },

@@ -5,6 +5,7 @@ import Login from "../views/Login.vue";
 import Profile from "../views/Profile.vue";
 import Group from "../views/Group.vue";
 import MakeBet from "../views/MakeBet.vue";
+import MakeGroup from "../views/MakeGroup.vue";
 
 Vue.use(VueRouter);
 
@@ -48,6 +49,11 @@ const routes: Array<RouteConfig> = [
                 id: route.params.id,
             };
         },
+    },
+    {
+        name: "makeGroup",
+        path: "/groups/make",
+        component: MakeGroup,
     },
     {
         path: "/profile",

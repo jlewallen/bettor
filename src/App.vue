@@ -5,24 +5,24 @@
                 <md-button class="md-icon-button" @click="menuVisible = !menuVisible">
                     <md-icon>menu</md-icon>
                 </md-button>
+
                 <span class="md-title">Bettor</span>
+
+                <md-button class="md-icon-button" @click="addGroup">
+                    <md-icon>add</md-icon>
+                </md-button>
             </md-app-toolbar>
 
             <md-app-drawer :md-active.sync="menuVisible" md-persistent="full">
                 <md-toolbar class="md-transparent" md-elevation="0">Navigation</md-toolbar>
 
                 <md-list>
-                    <md-list-item to="/groups">
+                    <md-list-item @click="openGroups">
                         <md-icon>move_to_inbox</md-icon>
                         <span class="md-list-item-text">Groups</span>
                     </md-list-item>
 
-                    <md-list-item>
-                        <md-icon>move_to_inbox</md-icon>
-                        <span class="md-list-item-text">Bets</span>
-                    </md-list-item>
-
-                    <md-list-item to="/profile">
+                    <md-list-item @click="openProfile">
                         <md-icon>move_to_inbox</md-icon>
                         <span class="md-list-item-text">Profile</span>
                     </md-list-item>
@@ -46,6 +46,21 @@ export default Vue.extend({
         return {
             menuVisible: false,
         };
+    },
+    methods: {
+        openGroups(): void {
+            this.$router.push({ name: "groups" });
+            this.menuVisible = false;
+        },
+        openProfile(): void {
+            this.$router.push({ name: "profile" });
+            this.menuVisible = false;
+        },
+        addGroup(): void {
+            console.log("add-group");
+            this.$router.push({ name: "makeGroup" });
+            this.menuVisible = false;
+        },
     },
 });
 </script>
