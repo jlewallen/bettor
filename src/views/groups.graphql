@@ -137,8 +137,19 @@ mutation sayBetChat($betId: ID!, $message: String) {
   }
 }
 
-mutation createBet($groupId: ID!, $title: String!, $expiresIn: Int!, $details: String!) {
-  createBet(payload: { groupId: $groupId, title: $title, expiresIn: $expiresIn, details: $details }) {
+mutation createBet($groupId: ID!,
+				   $title: String!,
+				   $expiresIn: Int!,
+				   $details: String!,
+				   $minimumTakers: Int!,
+				   $maximumTakers: Int!) {
+  createBet(payload: {
+	groupId: $groupId,
+	title: $title,
+	expiresIn: $expiresIn,
+	details: $details,
+	minimumTakers: $minimumTakers,
+	maximumTakers: $maximumTakers}) {
 	ok
 	bet {
 	  ...QueriedBetFields

@@ -174,15 +174,15 @@ class Bet(Base):
         title: str = None,
         details: str = None,
         author: User = None,
-        minimum: int = 1,
-        maximum: int = 10,
+        minimum_takers: int = 1,
+        maximum_takers: int = 10,
         **kwargs
     ) -> "Bet":
         assert title
         assert author
         details = details if details else title
         myself = Position(title="Bettor", minimum=1, maximum=1)
-        takers = Position(title="Takers", minimum=minimum, maximum=maximum)
+        takers = Position(title="Takers", minimum=minimum_takers, maximum=maximum_takers)
         myself.take(author)
         return Bet(
             title=title,

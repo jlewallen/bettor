@@ -38,6 +38,8 @@ class BetAttribute:
     details = graphene.String(required=True)
     expires_in = graphene.Int(required=True)
     group_id = graphene.ID(required=True)
+    minimum_takers = graphene.Int(required=True)
+    maximum_takers = graphene.Int(required=True)
     arbitrary = graphene.Boolean()
 
 
@@ -61,6 +63,8 @@ class CreateBet(graphene.Mutation):
             title=payload.title,
             group_id=payload.group_id,
             expires_at=datetime.datetime.utcnow() + expires_in,
+            minimum_takers=payload.minimum_takers,
+            maximum_takers=payload.maximum_takers,
         )
         session.commit()
         return CreateBet(bet=bet, ok=True)

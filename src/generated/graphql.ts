@@ -249,6 +249,8 @@ export type CreateBetPayload = {
   details: Scalars['String'];
   expiresIn: Scalars['Int'];
   groupId: Scalars['ID'];
+  minimumTakers: Scalars['Int'];
+  maximumTakers: Scalars['Int'];
   arbitrary?: Maybe<Scalars['Boolean']>;
 };
 
@@ -529,6 +531,8 @@ export type CreateBetMutationVariables = Exact<{
   title: Scalars['String'];
   expiresIn: Scalars['Int'];
   details: Scalars['String'];
+  minimumTakers: Scalars['Int'];
+  maximumTakers: Scalars['Int'];
 }>;
 
 
@@ -764,9 +768,9 @@ export const SayBetChatDocument = gql`
 }
     ${BetChatMessageFieldsFragmentDoc}`;
 export const CreateBetDocument = gql`
-    mutation createBet($groupId: ID!, $title: String!, $expiresIn: Int!, $details: String!) {
+    mutation createBet($groupId: ID!, $title: String!, $expiresIn: Int!, $details: String!, $minimumTakers: Int!, $maximumTakers: Int!) {
   createBet(
-    payload: {groupId: $groupId, title: $title, expiresIn: $expiresIn, details: $details}
+    payload: {groupId: $groupId, title: $title, expiresIn: $expiresIn, details: $details, minimumTakers: $minimumTakers, maximumTakers: $maximumTakers}
   ) {
     ok
     bet {
