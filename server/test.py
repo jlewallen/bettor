@@ -35,7 +35,7 @@ def main():
 
     query = """
     mutation {
-        createBet(payload: { title: "New bet!", details: "", expiresIn: 60, groupId: 2 }) {
+        createBet(payload: { title: "New bet!", details: "", expiresIn: 60, groupId: 2, minimumTakers: 0, maximumTakers: 3 }) {
             bet { id }
             ok
         }
