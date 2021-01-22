@@ -184,3 +184,12 @@ mutation cancelBet($betId: ID!) {
 	}
   }
 }
+
+mutation remindBet($betId: ID!) {
+  remindBet(payload: { betId: $betId }) {
+	ok
+	bet {
+	  ...QueriedBetFields
+	}
+  }
+}

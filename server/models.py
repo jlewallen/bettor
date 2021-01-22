@@ -182,7 +182,9 @@ class Bet(Base):
         assert author
         details = details if details else title
         myself = Position(title="Bettor", minimum=1, maximum=1)
-        takers = Position(title="Takers", minimum=minimum_takers, maximum=maximum_takers)
+        takers = Position(
+            title="Takers", minimum=minimum_takers, maximum=maximum_takers
+        )
         myself.take(author)
         return Bet(
             title=title,
@@ -209,8 +211,8 @@ class Bet(Base):
         return datetime.datetime.utcnow() > self.expires_at
 
     def is_involved(self, user: User) -> bool:
-        return user  in self.users_with_positions()
-    
+        return user in self.users_with_positions()
+
     def can_take(self, user: User) -> bool:
         if self.is_expired():
             return False
@@ -233,6 +235,9 @@ class Bet(Base):
     def check_expired(self):
         if self.is_expired():
             raise Exception("expired")
+
+    def remind(self, user: User):
+        self.touch()
 
     def suggested(self, user: User) -> Optional[str]:
         op = self.open_positions()

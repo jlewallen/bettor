@@ -176,6 +176,31 @@ class SayBetChat(graphene.Mutation):
         return SayBetChat(message=message, ok=True)
 
 
+class RemindBetAttributes:
+    bet_id = graphene.ID(required=True)
+
+
+class RemindBetPayload(graphene.InputObjectType, RemindBetAttributes):
+    pass
+
+
+class RemindBet(graphene.Mutation):
+    bet = graphene.Field(schema.Bet)
+    ok = graphene.Boolean()
+
+    class Arguments:
+        payload = RemindBetPayload(required=True)
+
+    @staticmethod
+    def mutate(self, info, payload):
+        user = info.context["user"]
+        bet = session.query(models.Bet).get(payload.bet_id)
+        bet.remind(user)
+        bet.touch()
+        session.commit()
+        return CancelBet(bet=bet, ok=True)
+
+
 class CancelBetAttributes:
     bet_id = graphene.ID(required=True)
 
@@ -264,5 +289,6 @@ class Mutation(graphene.ObjectType):
     sayGroupChat = SayGroupChat.Field()
     sayBetChat = SayBetChat.Field()
     cancelBet = CancelBet.Field()
+    remindBet = RemindBet.Field()
     invite = Invite.Field()
     remove = Remove.Field()

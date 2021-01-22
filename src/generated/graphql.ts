@@ -180,6 +180,7 @@ export type Mutation = {
   sayGroupChat?: Maybe<SayGroupChat>;
   sayBetChat?: Maybe<SayBetChat>;
   cancelBet?: Maybe<CancelBet>;
+  remindBet?: Maybe<RemindBet>;
   invite?: Maybe<Invite>;
   remove?: Maybe<Remove>;
 };
@@ -217,6 +218,11 @@ export type MutationSayBetChatArgs = {
 
 export type MutationCancelBetArgs = {
   payload: CancelBetPayload;
+};
+
+
+export type MutationRemindBetArgs = {
+  payload: RemindBetPayload;
 };
 
 
@@ -306,6 +312,16 @@ export type CancelBet = {
 };
 
 export type CancelBetPayload = {
+  betId: Scalars['ID'];
+};
+
+export type RemindBet = {
+  __typename?: 'RemindBet';
+  bet?: Maybe<Bet>;
+  ok?: Maybe<Scalars['Boolean']>;
+};
+
+export type RemindBetPayload = {
   betId: Scalars['ID'];
 };
 
@@ -602,6 +618,23 @@ export type CancelBetMutation = (
   )> }
 );
 
+export type RemindBetMutationVariables = Exact<{
+  betId: Scalars['ID'];
+}>;
+
+
+export type RemindBetMutation = (
+  { __typename?: 'Mutation' }
+  & { remindBet?: Maybe<(
+    { __typename?: 'RemindBet' }
+    & Pick<RemindBet, 'ok'>
+    & { bet?: Maybe<(
+      { __typename?: 'Bet' }
+      & QueriedBetFieldsFragment
+    )> }
+  )> }
+);
+
 export const GroupFieldsFragmentDoc = gql`
     fragment GroupFields on Group {
   id
@@ -811,6 +844,16 @@ export const CancelBetDocument = gql`
   }
 }
     ${QueriedBetFieldsFragmentDoc}`;
+export const RemindBetDocument = gql`
+    mutation remindBet($betId: ID!) {
+  remindBet(payload: {betId: $betId}) {
+    ok
+    bet {
+      ...QueriedBetFields
+    }
+  }
+}
+    ${QueriedBetFieldsFragmentDoc}`;
 
 export type SdkFunctionWrapper = <T>(action: () => Promise<T>) => Promise<T>;
 
@@ -856,6 +899,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     cancelBet(variables: CancelBetMutationVariables, requestHeaders?: Headers): Promise<CancelBetMutation> {
       return withWrapper(() => client.request<CancelBetMutation>(print(CancelBetDocument), variables, requestHeaders));
+    },
+    remindBet(variables: RemindBetMutationVariables, requestHeaders?: Headers): Promise<RemindBetMutation> {
+      return withWrapper(() => client.request<RemindBetMutation>(print(RemindBetDocument), variables, requestHeaders));
     }
   };
 }
