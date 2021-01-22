@@ -29,9 +29,13 @@ class Bet(ActiveSQLAlchemyObjectType):
     expired = graphene.NonNull(graphene.Boolean)
     can_take = graphene.NonNull(graphene.Boolean)
     can_cancel = graphene.NonNull(graphene.Boolean)
+    suggested = graphene.String()
 
     def resolve_expired(self, info):
         return self.is_expired()
+
+    def resolve_suggested(self, info):
+        return self.suggested(info.context["user"])
 
     def resolve_can_take(self, info):
         return self.can_take(info.context["user"])
@@ -43,6 +47,15 @@ class Bet(ActiveSQLAlchemyObjectType):
 class Position(ActiveSQLAlchemyObjectType):
     class Meta:
         model = models.Position
+
+    can_take = graphene.NonNull(graphene.Boolean)
+    can_cancel = graphene.NonNull(graphene.Boolean)
+
+    def resolve_can_take(self, info):
+        return self.can_take(info.context["user"])
+
+    def resolve_can_cancel(self, info):
+        return self.can_cancel(info.context["user"])
 
 
 class UserPosition(ActiveSQLAlchemyObjectType):

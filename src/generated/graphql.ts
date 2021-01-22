@@ -103,6 +103,7 @@ export type Bet = {
   expired: Scalars['Boolean'];
   canTake: Scalars['Boolean'];
   canCancel: Scalars['Boolean'];
+  suggested?: Maybe<Scalars['String']>;
 };
 
 /** An enumeration. */
@@ -124,6 +125,8 @@ export type Position = {
   maximum: Scalars['Int'];
   bet?: Maybe<Bet>;
   userPositions?: Maybe<Array<Maybe<UserPosition>>>;
+  canTake: Scalars['Boolean'];
+  canCancel: Scalars['Boolean'];
 };
 
 export type UserPosition = {
@@ -379,7 +382,7 @@ export type QueryGroupsQuery = (
 
 export type QueriedBetFieldsFragment = (
   { __typename?: 'Bet' }
-  & Pick<Bet, 'id' | 'title' | 'details' | 'createdAt' | 'expiresAt' | 'expired' | 'canTake' | 'canCancel' | 'activityAt' | 'state'>
+  & Pick<Bet, 'id' | 'title' | 'details' | 'createdAt' | 'expiresAt' | 'expired' | 'canTake' | 'canCancel' | 'activityAt' | 'state' | 'suggested'>
   & { group?: Maybe<(
     { __typename?: 'Group' }
     & Pick<Group, 'id'>
@@ -388,7 +391,7 @@ export type QueriedBetFieldsFragment = (
     & UserRefFragment
   )>, positions?: Maybe<Array<Maybe<(
     { __typename?: 'Position' }
-    & Pick<Position, 'title'>
+    & Pick<Position, 'title' | 'canTake' | 'canCancel'>
     & { userPositions?: Maybe<Array<Maybe<(
       { __typename?: 'UserPosition' }
       & Pick<UserPosition, 'createdAt' | 'state'>
@@ -638,14 +641,17 @@ export const QueriedBetFieldsFragmentDoc = gql`
   author {
     ...UserRef
   }
+  suggested
   positions {
     title
+    canTake
+    canCancel
     userPositions {
+      createdAt
+      state
       user {
         ...UserRef
       }
-      createdAt
-      state
     }
   }
 }

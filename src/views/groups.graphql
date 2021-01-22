@@ -56,14 +56,17 @@ fragment QueriedBetFields on Bet {
   author {
 	...UserRef
   }
+  suggested
   positions {
 	title
+	canTake
+	canCancel
 	userPositions {
+	  createdAt
+	  state
 	  user {
 		...UserRef
 	  }
-	  createdAt
-	  state
 	}
   }
 }

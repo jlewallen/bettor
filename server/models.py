@@ -1,4 +1,5 @@
-from typing import List, Any, Union
+from typing import List, Any, Union, Optional
+
 from sqlalchemy import Column, Integer, String, Table, Text, ForeignKey, DateTime, Enum
 from sqlalchemy.orm import relationship
 
@@ -52,7 +53,7 @@ class User(Base):
     def touch(self):
         self.activity_at = datetime.datetime.utcnow()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<User(id='%s', name='%s', picture='%s')>" % (
             self.id,
             self.name,
@@ -87,7 +88,7 @@ class Group(Base):
         self.members.append(user)
         return user
 
-    def remove(self, user: User):
+    def remove(self, user: User) -> Optional[User]:
         if user in self.members:
             self.members.remove(user)
         return user
@@ -212,12 +213,21 @@ class Bet(Base):
             return False
         if self.has_position(user):
             return False
-        return len([p for p in self.positions if p.is_open()]) > 0
+        return len(self.open_positions()) > 0
 
     def can_cancel(self, user: User) -> bool:
         if self.author.id == user.id:
             return self.state != BetState.CANCELLED
         return self.has_position(user)
+
+    def open_positions(self) -> List["Position"]:
+        return [p for p in self.positions if p.is_open()]
+
+    def suggested(self, user: User) -> Optional[str]:
+        op = self.open_positions()
+        if len(op):
+            return op[0].title
+        return None
 
     def take(self, user: User, position: str = None):
         if self.state == BetState.CANCELLED:
@@ -253,8 +263,11 @@ class Bet(Base):
     def users_with_positions(self) -> List[User]:
         return flatten([p.valid_users() for p in self.positions])
 
+    def all_users_with_positions(self) -> List[User]:
+        return flatten([p.valid_users() for p in self.positions])
+
     def has_position(self, user: User) -> bool:
-        return user in self.users_with_positions()
+        return user in self.all_users_with_positions()
 
     def __repr__(self):
         return "<Bet(id='%s', state='%s', title='%s')>" % (
@@ -276,8 +289,17 @@ class Position(Base):
     bet = relationship("Bet", back_populates="positions")
     user_positions = relationship("UserPosition")
 
+    def can_take(self, user: User) -> bool:
+        return user not in self.valid_users()
+
+    def can_cancel(self, user: User) -> bool:
+        return user in self.valid_users()
+
     def is_open(self) -> bool:
         return len(self.valid_users()) < self.maximum
+
+    def all_users(self) -> List[User]:
+        return [up.user for up in self.user_positions]
 
     def valid_users(self) -> List[User]:
         return [up.user for up in self.user_positions if up.is_valid()]

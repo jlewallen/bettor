@@ -14,7 +14,7 @@
             md-content="Are you sure you want to take this bet?"
             md-confirm-text="Take"
             md-cancel-text="No no"
-            @md-confirm="onTake"
+            @md-confirm="onTake(taking)"
         />
         <UserPhoto :user="entry.bet.author" class="feed-photo" />
         <div class="feed-body">
@@ -36,7 +36,12 @@
                         <md-card-actions md-alignment="space-between">
                             <div>
                                 <md-button @click="cancel = true" v-if="entry.bet.canCancel">Cancel</md-button>
-                                <md-button @click="take = true" v-if="entry.bet.canTake">Take</md-button>
+                                <md-button
+                                    @click="(take = true), (taking = entry.bet.suggested)"
+                                    v-if="entry.bet.canTake && entry.bet.suggested"
+                                >
+                                    Take
+                                </md-button>
                             </div>
 
                             <md-card-expand-trigger>
@@ -54,8 +59,29 @@
 
                                 <div>
                                     <div v-for="position in entry.bet.positions" v-bind:key="position.id">
-                                        <h3>{{ position.title }}</h3>
-                                        <div v-for="up in position.userPositions" v-bind:key="up.id" class="taker">
+                                        <div class="position">
+                                            <h3>{{ position.title }}</h3>
+                                            <md-button
+                                                @click="(take = true), (taking = position.title)"
+                                                v-if="entry.bet.canTake && position.canTake"
+                                                class="md-primary"
+                                            >
+                                                Take
+                                            </md-button>
+                                            <md-button
+                                                @click="cancel = true"
+                                                v-if="entry.bet.canCancel && position.canCancel"
+                                                class="md-primary"
+                                            >
+                                                Cancel
+                                            </md-button>
+                                        </div>
+                                        <div
+                                            v-for="up in position.userPositions"
+                                            v-bind:key="up.id"
+                                            class="taker"
+                                            v-bind:class="positionClasses(up)"
+                                        >
                                             <TinyAvatar :user="up.user" />
                                         </div>
                                     </div>
@@ -73,7 +99,7 @@
 import Vue, { PropType } from "vue";
 import UserPhoto from "./UserPhoto.vue";
 import TinyAvatar from "./TinyAvatar.vue";
-import { BetState, BetEntry, TakePositionAction, CancelPositionAction } from "@/store";
+import { BetState, PositionState, BetEntry, TakePositionAction, CancelPositionAction } from "@/store";
 import moment from "moment";
 
 export default Vue.extend({
@@ -91,10 +117,12 @@ export default Vue.extend({
     data(): {
         cancel: boolean;
         take: boolean;
+        taking: string;
     } {
         return {
             cancel: false,
             take: false,
+            taking: "*",
         };
     },
     computed: {
@@ -108,6 +136,11 @@ export default Vue.extend({
         console.log(`entry`, this.entry);
     },
     methods: {
+        positionClasses(up: { state: PositionState }): Record<string, boolean> {
+            return {
+                [up.state.toString().toLowerCase()]: true,
+            };
+        },
         raiseTap(): void {
             this.$emit("tap");
         },
@@ -122,8 +155,8 @@ export default Vue.extend({
         canExpand(): boolean {
             return this.entry.bet.state != BetState.Cancelled;
         },
-        async onTake(): Promise<void> {
-            await this.$store.dispatch(new TakePositionAction(this.entry.bet.id, "*"));
+        async onTake(position: string): Promise<void> {
+            await this.$store.dispatch(new TakePositionAction(this.entry.bet.id, position));
         },
         async onCancel(): Promise<void> {
             await this.$store.dispatch(new CancelPositionAction(this.entry.bet.id, "*"));
@@ -136,12 +169,25 @@ export default Vue.extend({
 .bet {
     .md-card {
         .md-card-header {
-            background-color: #efdfde;
+            background-color: #87cefa;
+        }
+    }
+
+    .md-card.open {
+        .md-card-header {
+            background-color: #20b2aa;
+        }
+    }
+
+    .md-card.closed {
+        .md-card-header {
+            background-color: #9acd32;
         }
     }
 
     .md-card.cancelled {
         .md-card-header {
+            background-color: #9acd32;
             .md-title {
                 text-decoration: line-through;
             }
@@ -150,6 +196,15 @@ export default Vue.extend({
 
     .taker {
         margin-bottom: 0.5em;
+    }
+
+    .taker.cancelled {
+        text-decoration: line-through;
+    }
+
+    .position {
+        display: flex;
+        align-items: center;
     }
 }
 </style>
