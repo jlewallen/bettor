@@ -48,26 +48,31 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-.author {
-    font-size: 14pt;
-}
-.message {
-    font-size: 14pt;
-}
-.time {
-    font-size: 8pt;
-    color: #808080;
-}
+.entry {
+    .author {
+        font-size: 14pt;
+    }
 
-p {
-    padding: 8px 10px 8px 10px;
-    background: #efefaf;
-    word-wrap: break-word;
-    font-family: Monospace;
-    border-radius: 3px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-.bubble {
-    display: flex;
+    .bubble {
+        display: flex;
+        flex-direction: column;
+        padding: 8px 10px 8px 10px;
+        background: #efefaf;
+        border-radius: 3px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+
+        p {
+            margin: 0em;
+            word-wrap: break-word;
+            font-family: Monospace;
+        }
+        .time {
+            font-size: 8pt;
+            color: #808080;
+        }
+        .message {
+            font-size: 14pt;
+        }
+    }
 }
 </style>

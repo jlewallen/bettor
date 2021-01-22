@@ -78,6 +78,10 @@ export default Vue.extend({
 
                 & .bubble {
                     align-self: flex-end;
+
+                    & .time {
+                        align-self: flex-end;
+                    }
                 }
                 /*
                 &:before {
@@ -108,7 +112,6 @@ export default Vue.extend({
 
             & .bubble {
                 align-self: flex-start;
-                display: inline-block;
                 margin: 0;
                 width: auto;
             }
