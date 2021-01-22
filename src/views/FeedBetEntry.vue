@@ -16,7 +16,7 @@
             md-cancel-text="No no"
             @md-confirm="onTake(taking)"
         />
-        <UserPhoto :user="entry.bet.author" class="feed-photo" />
+        <UserPhoto :user="entry.bet.modifier" class="feed-photo" />
         <div class="feed-body">
             <p v-if="false">
                 {{ entry.bet.title }}
@@ -33,7 +33,10 @@
                     <md-card-header>
                         <div class="md-title">{{ entry.bet.title }}</div>
                         <div class="md-subhead">{{ entry.bet.state }}</div>
-                        <span class="time">
+                        <span class="count-down">
+                            {{ countDown }}
+                        </span>
+                        <span class="time" v-if="false">
                             {{ prettyTime(entry.bet.activityAt) }}
                         </span>
                     </md-card-header>
@@ -139,6 +142,10 @@ export default Vue.extend({
                 involved: this.entry.bet.involved,
             };
         },
+        countDown(): string {
+            const expiresAt = moment.utc(this.entry.bet.expiresAt);
+            return expiresAt.fromNow();
+        },
     },
     mounted(): void {
         console.log(`entry`, this.entry);
@@ -153,7 +160,7 @@ export default Vue.extend({
             this.$emit("tap");
         },
         prettyTime(date: Date): string {
-            return moment(date).format("h:mm:ss");
+            return moment.utc(date).format("h:mm:ss");
         },
         myself(): boolean {
             const self = this.$store.state.self;
