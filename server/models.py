@@ -208,6 +208,9 @@ class Bet(Base):
     def is_expired(self) -> bool:
         return datetime.datetime.utcnow() > self.expires_at
 
+    def is_involved(self, user: User) -> bool:
+        return user  in self.users_with_positions()
+    
     def can_take(self, user: User) -> bool:
         if self.is_expired():
             return False
