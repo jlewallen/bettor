@@ -4,33 +4,44 @@ import Home from "../views/Home.vue";
 import Login from "../views/Login.vue";
 import Profile from "../views/Profile.vue";
 import Group from "../views/Group.vue";
+import MakeBet from "../views/MakeBet.vue";
 
 Vue.use(VueRouter);
 
 const routes: Array<RouteConfig> = [
     {
-        path: "/",
         name: "home",
+        path: "/",
         component: Home,
     },
     {
-        path: "/groups",
-        name: "groups",
-        component: Home,
-    },
-    {
-        path: "/login",
         name: "login",
+        path: "/login",
         component: Login,
     },
     {
-        path: "/callback",
         name: "loginComplete",
+        path: "/callback",
         component: Login,
     },
     {
-        path: "/groups/:id",
+        name: "groups",
+        path: "/groups",
+        component: Home,
+    },
+    {
+        name: "makeBet",
+        path: "/gropus/:id/make-bet",
+        component: MakeBet,
+        props: (route) => {
+            return {
+                id: route.params.id,
+            };
+        },
+    },
+    {
         name: "group",
+        path: "/groups/:id",
         component: Group,
         props: (route) => {
             return {

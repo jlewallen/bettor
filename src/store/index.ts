@@ -7,7 +7,13 @@ import { ID } from "./types";
 
 import { authenticated, Group, Bet, LoginPerson, getApi } from "../http";
 
-import { ListedGroupFieldsFragment, QueriedGroupFieldsFragment, GroupChatMessageFieldsFragment, QueriedBetFieldsFragment } from "../http";
+import {
+    ListedGroupFieldsFragment,
+    QueriedGroupFieldsFragment,
+    GroupChatMessageFieldsFragment,
+    QueriedBetFieldsFragment,
+    CreateBetMutationVariables,
+} from "../http";
 
 export { authenticated, Group, Bet, LoginPerson };
 
@@ -64,12 +70,7 @@ export class CancelPositionAction {
 export class CreateBetAction {
     type = ActionTypes.CREATE_BET;
 
-    constructor(
-        public readonly groupId: ID,
-        public readonly title: string,
-        public readonly expiresIn: number,
-        public readonly details: string
-    ) {}
+    constructor(public readonly vars: CreateBetMutationVariables) {}
 }
 
 export class CancelBetAction {
@@ -238,8 +239,10 @@ export default new Vuex.Store({
                 commit(MutationTypes.APPEND_GROUP_FEED_CHAT, { groupId: payload.groupId, message: response.sayGroupChat.message });
             }
         },
-        [ActionTypes.CREATE_BET]: async ({ commit, dispatch }, payload: CancelBetAction) => {
+        [ActionTypes.CREATE_BET]: async ({ commit, dispatch }, payload: CreateBetAction) => {
             const api = getApi();
+            const reply = await api.createBet(payload.vars);
+            console.log("reply", reply);
             // commit(MutationTypes.REORDER_FEED, { groupId: bet.group.id });
         },
         [ActionTypes.TAKE_POSITION]: async ({ commit, dispatch }, payload: TakePositionAction) => {

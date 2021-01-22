@@ -8,12 +8,7 @@
                     </md-field>
                 </div>
                 <div class="md-layout-item md-size-10">
-                    <md-button class="md-primary md-raised" @click="showBetForm = true">Bet!</md-button>
-                </div>
-            </div>
-            <div class="md-layout md-gutter">
-                <div class="md-layout-item md-small-size-100">
-                    <MakeBetForm v-if="showBetForm" @bet="onBet" @cancel="onCancelBet" />
+                    <md-button class="md-primary md-raised" @click="onGoMakeBet">Bet!</md-button>
                 </div>
             </div>
         </form>
@@ -22,15 +17,16 @@
 
 <script lang="ts">
 import Vue from "vue";
-import MakeBetForm from "./MakeBetForm.vue";
 import { CreateBetMutationVariables } from "@/store";
 
 export default Vue.extend({
     name: "ChatMessage",
-    components: {
-        MakeBetForm,
+    props: {
+        groupId: {
+            type: String,
+            required: true,
+        },
     },
-    props: {},
     data(): {
         showBetForm: boolean;
         form: {
@@ -45,6 +41,9 @@ export default Vue.extend({
         };
     },
     methods: {
+        onGoMakeBet() {
+            this.$router.push({ name: "makeBet", params: { id: this.groupId } });
+        },
         onSend(): void {
             console.log("onSend", this.form);
             this.$emit("send", this.form);
@@ -52,13 +51,8 @@ export default Vue.extend({
                 message: "",
             };
         },
-        onBet(bet: CreateBetMutationVariables) {
-            console.log("onBet", bet);
-        },
-        onCancelBet() {
-            console.log("onCancelBet");
-            this.showBetForm = false;
-        },
     },
 });
 </script>
+
+<style lang="scss" scoped></style>

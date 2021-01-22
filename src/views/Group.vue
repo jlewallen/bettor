@@ -4,7 +4,7 @@
             {{ group.name }}
         </h1>
         <Feed :feed="feed" v-if="feed" @selected="onSelected" />
-        <ChatMessage @send="talk" />
+        <ChatMessage :groupId="id" @send="talk" />
     </div>
 </template>
 
@@ -28,9 +28,11 @@ export default Vue.extend({
         },
     },
     data(): {
+        loaded: boolean;
         loading: boolean;
     } {
         return {
+            loaded: false,
             loading: false,
         };
     },
@@ -50,9 +52,12 @@ export default Vue.extend({
             this.$router.push("/login");
             return;
         }
-        this.loading = true;
-        await this.$store.dispatch(new LoadGroupAction(this.id));
-        this.loading = false;
+        if (!this.loaded) {
+            this.loading = true;
+            await this.$store.dispatch(new LoadGroupAction(this.id));
+            this.loading = false;
+            this.loaded = true;
+        }
     },
     methods: {
         async talk(form: { message: string }): Promise<void> {
