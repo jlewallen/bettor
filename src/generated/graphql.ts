@@ -102,6 +102,7 @@ export type Bet = {
   watchers?: Maybe<Array<Maybe<User>>>;
   expired: Scalars['Boolean'];
   involved: Scalars['Boolean'];
+  cancelled: Scalars['Boolean'];
   suggested?: Maybe<Scalars['String']>;
   modifier: User;
   canTake: Scalars['Boolean'];
@@ -402,7 +403,7 @@ export type QueryGroupsQuery = (
 
 export type QueriedBetFieldsFragment = (
   { __typename?: 'Bet' }
-  & Pick<Bet, 'id' | 'title' | 'details' | 'createdAt' | 'expiresAt' | 'expired' | 'involved' | 'canTake' | 'canCancel' | 'activityAt' | 'state' | 'suggested'>
+  & Pick<Bet, 'id' | 'title' | 'details' | 'createdAt' | 'expiresAt' | 'expired' | 'involved' | 'cancelled' | 'canTake' | 'canCancel' | 'activityAt' | 'state' | 'suggested'>
   & { group?: Maybe<(
     { __typename?: 'Group' }
     & Pick<Group, 'id'>
@@ -674,6 +675,7 @@ export const QueriedBetFieldsFragmentDoc = gql`
   expiresAt
   expired
   involved
+  cancelled
   canTake
   canCancel
   activityAt

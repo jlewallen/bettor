@@ -32,10 +32,8 @@
 
                     <md-card-header>
                         <div class="md-title">{{ entry.bet.title }}</div>
-                        <div class="md-subhead">{{ entry.bet.state }}</div>
-                        <span class="count-down">
-                            {{ countDown }}
-                        </span>
+                        <div class="md-subhead">{{ state }}</div>
+                        <span class="count-down" v-if="!entry.bet.expired && !entry.bet.cancelled">Expires {{ countDown }}</span>
                         <span class="time" v-if="false">
                             {{ prettyTime(entry.bet.activityAt) }}
                         </span>
@@ -135,6 +133,12 @@ export default Vue.extend({
         };
     },
     computed: {
+        state(): BetState {
+            if (this.entry.bet.expired) {
+                return BetState.Expired;
+            }
+            return this.entry.bet.state;
+        },
         classObject() {
             return {
                 [this.entry.bet.state.toString().toLowerCase()]: true,

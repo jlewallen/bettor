@@ -47,6 +47,7 @@ fragment QueriedBetFields on Bet {
   expiresAt
   expired
   involved
+  cancelled
   canTake
   canCancel
   activityAt

@@ -207,6 +207,9 @@ class Bet(Base):
             **kwargs
         )
 
+    def is_cancelled(self) -> bool:
+        return self.state == BetState.CANCELLED
+
     def is_expired(self) -> bool:
         return datetime.datetime.utcnow() > self.expires_at
 
