@@ -28,9 +28,10 @@ class Bet(ActiveSQLAlchemyObjectType):
 
     expired = graphene.NonNull(graphene.Boolean)
     involved = graphene.NonNull(graphene.Boolean)
+    suggested = graphene.String()
+    modifier = graphene.NonNull(User)
     can_take = graphene.NonNull(graphene.Boolean)
     can_cancel = graphene.NonNull(graphene.Boolean)
-    suggested = graphene.String()
 
     def resolve_expired(self, info):
         return self.is_expired()
@@ -40,6 +41,9 @@ class Bet(ActiveSQLAlchemyObjectType):
 
     def resolve_suggested(self, info):
         return self.suggested(info.context["user"])
+
+    def resolve_modifier(self, info):
+        return self.modifier()
 
     def resolve_can_take(self, info):
         return self.can_take(info.context["user"])

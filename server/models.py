@@ -213,6 +213,15 @@ class Bet(Base):
     def is_involved(self, user: User) -> bool:
         return user in self.users_with_positions()
 
+    def modifier(self) -> User:
+        positions = list(self.user_positions())
+        if len(positions) > 0:
+            return positions[-1].user
+        return self.author
+
+    def user_positions(self) -> List["UserPosition"]:
+        return flatten([p.user_positions for p in self.positions])
+
     def can_take(self, user: User) -> bool:
         if self.is_expired():
             return False
@@ -370,9 +379,9 @@ class UserPosition(Base):
         self.state = PositionState.CANCELLED
 
     def __repr__(self):
-        return "<UserPosition(id='%s', title='%s')>" % (
+        return "<UserPosition(id='%s', state='%s')>" % (
             self.id,
-            self.title,
+            self.state,
         )
 
 

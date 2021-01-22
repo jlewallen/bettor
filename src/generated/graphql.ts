@@ -102,9 +102,10 @@ export type Bet = {
   watchers?: Maybe<Array<Maybe<User>>>;
   expired: Scalars['Boolean'];
   involved: Scalars['Boolean'];
+  suggested?: Maybe<Scalars['String']>;
+  modifier: User;
   canTake: Scalars['Boolean'];
   canCancel: Scalars['Boolean'];
-  suggested?: Maybe<Scalars['String']>;
 };
 
 /** An enumeration. */
@@ -405,7 +406,10 @@ export type QueriedBetFieldsFragment = (
   & { group?: Maybe<(
     { __typename?: 'Group' }
     & Pick<Group, 'id'>
-  )>, author?: Maybe<(
+  )>, modifier: (
+    { __typename?: 'User' }
+    & UserRefFragment
+  ), author?: Maybe<(
     { __typename?: 'User' }
     & UserRefFragment
   )>, positions?: Maybe<Array<Maybe<(
@@ -676,6 +680,9 @@ export const QueriedBetFieldsFragmentDoc = gql`
   state
   group {
     id
+  }
+  modifier {
+    ...UserRef
   }
   author {
     ...UserRef
