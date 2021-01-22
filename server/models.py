@@ -379,13 +379,15 @@ def create_examples():
     group_epoch = datetime.datetime.utcnow()
     bet_time = group_epoch
 
+    bet_time -= datetime.timedelta(seconds=random.randrange(30, 60))
+
     group = Group(
         name="Small Group",
         owner=jacob,
         members=[jacob, stephen, jimmy, derek, zack, scott],
     )
 
-    bet_time += datetime.timedelta(seconds=random.randrange(30, 60))
+    bet_time -= datetime.timedelta(seconds=random.randrange(30, 60))
 
     simple = Bet.coin_toss(
         created_at=bet_time,
@@ -396,7 +398,7 @@ def create_examples():
     simple.take(jacob, position="heads")
     simple.take(stephen, position="tails")
 
-    bet_time += datetime.timedelta(seconds=random.randrange(30, 60))
+    bet_time -= datetime.timedelta(seconds=random.randrange(30, 60))
 
     jimmy_example = Bet.arbitrary(
         created_at=bet_time,
@@ -407,7 +409,7 @@ def create_examples():
     )
     jimmy_example.take(jimmy)
 
-    bet_time += datetime.timedelta(seconds=random.randrange(30, 60))
+    bet_time -= datetime.timedelta(seconds=random.randrange(30, 60))
 
     multiple_takers = Bet.arbitrary(
         created_at=bet_time,
@@ -419,7 +421,7 @@ def create_examples():
     multiple_takers.take(derek)
     multiple_takers.take(scott)
 
-    chat_time = group_epoch - datetime.timedelta(seconds=200)
+    chat_time = group_epoch
     for i in range(0, 10):
         for j in range(0, 2):
             user = random.choice(group.members)
@@ -427,6 +429,6 @@ def create_examples():
                 group=group, message=lorem.sentence(), author=user, created_at=chat_time
             )
             group.messages.append(message)
-            chat_time += datetime.timedelta(seconds=random.randrange(30, 60))
+            chat_time -= datetime.timedelta(seconds=random.randrange(30, 60))
 
     return group

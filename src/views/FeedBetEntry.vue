@@ -20,6 +20,9 @@
         <div class="feed-body">
             <p v-if="false">
                 {{ entry.bet.title }}
+                <span class="time">
+                    {{ prettyTime(entry.bet.activityAt) }}
+                </span>
             </p>
             <div class="bet">
                 <md-card v-bind:class="classObject">
@@ -30,6 +33,9 @@
                     <md-card-header>
                         <div class="md-title">{{ entry.bet.title }}</div>
                         <div class="md-subhead">{{ entry.bet.state }}</div>
+                        <span class="time">
+                            {{ prettyTime(entry.bet.activityAt) }}
+                        </span>
                     </md-card-header>
 
                     <md-card-expand>
@@ -145,7 +151,7 @@ export default Vue.extend({
             this.$emit("tap");
         },
         prettyTime(date: Date): string {
-            return moment(date).format("YYYY/MM/DD h:mm:ss");
+            return moment(date).format("h:mm:ss");
         },
         myself(): boolean {
             const self = this.$store.state.self;
