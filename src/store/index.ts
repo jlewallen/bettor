@@ -87,15 +87,15 @@ export class CancelBetAction {
     constructor(public readonly betId: ID) {}
 }
 
-export interface FeedVisitor {
-    visitChat(entry: ChatEntry): void;
-    visitBet(entry: BetEntry): void;
+export interface FeedVisitor<T> {
+    visitChat(entry: ChatEntry): T;
+    visitBet(entry: BetEntry): T;
 }
 
 export interface FeedEntry {
     key: string;
     time: Date;
-    accept(visitor: FeedVisitor): void;
+    accept<T>(visitor: FeedVisitor<T>): T;
 }
 
 export class ChatEntry implements FeedEntry {
@@ -109,7 +109,7 @@ export class ChatEntry implements FeedEntry {
 
     constructor(public readonly message: GroupChatMessageFieldsFragment) {}
 
-    public accept(visitor: FeedVisitor): void {
+    public accept<T>(visitor: FeedVisitor<T>): T {
         return visitor.visitChat(this);
     }
 }
@@ -125,7 +125,7 @@ export class BetEntry implements FeedEntry {
 
     constructor(public readonly bet: QueriedBetFieldsFragment) {}
 
-    public accept(visitor: FeedVisitor): void {
+    public accept<T>(visitor: FeedVisitor<T>): T {
         return visitor.visitBet(this);
     }
 }

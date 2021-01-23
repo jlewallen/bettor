@@ -10,7 +10,7 @@
 import Vue, { PropType } from "vue";
 import FeedBetEntry from "./FeedBetEntry.vue";
 import FeedChatEntry from "./FeedChatEntry.vue";
-import { Feed, FeedEntry } from "@/store";
+import { Feed, FeedEntry, BetEntry, ChatEntry } from "@/store";
 
 export default Vue.extend({
     name: "Feed",
@@ -26,7 +26,15 @@ export default Vue.extend({
     },
     methods: {
         entryFor(entry: FeedEntry): string {
-            return `Feed${entry.constructor.name}`;
+            const visitor = {
+                visitChat(entry: ChatEntry): string {
+                    return "FeedChatEntry";
+                },
+                visitBet(entry: BetEntry): string {
+                    return "FeedBetEntry";
+                },
+            };
+            return entry.accept<string>(visitor);
         },
         raiseSelected(entry: FeedEntry): void {
             this.$emit("selected", entry);
