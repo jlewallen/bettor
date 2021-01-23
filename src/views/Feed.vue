@@ -52,7 +52,7 @@ export default Vue.extend({
         }
 
         .md-card {
-            width: 320px;
+            max-width: 320px;
             margin: 4px;
             display: inline-block;
             vertical-align: top;

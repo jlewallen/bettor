@@ -7,6 +7,12 @@
                 </md-button>
 
                 <span class="md-title">Bettor</span>
+
+                <div class="md-toolbar-section-end" v-if="false">
+                    <md-button class="md-icon-button">
+                        <md-icon>more_vert</md-icon>
+                    </md-button>
+                </div>
             </md-app-toolbar>
 
             <md-app-drawer :md-active.sync="menuVisible" md-persistent="full">
