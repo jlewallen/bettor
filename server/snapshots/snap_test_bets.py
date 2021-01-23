@@ -11,7 +11,7 @@ snapshots['test_cancel_bet 1'] = {
     'data': {
         'createBet': {
             'bet': {
-                'id': '2'
+                'id': '1'
             },
             'ok': True
         }
@@ -22,7 +22,7 @@ snapshots['test_cancel_bet 2'] = {
     'data': {
         'cancelBet': {
             'bet': {
-                'id': '2'
+                'id': '1'
             },
             'ok': True
         }
@@ -55,7 +55,7 @@ snapshots['test_say_bet 1'] = {
     'data': {
         'createBet': {
             'bet': {
-                'id': '3'
+                'id': '1'
             },
             'ok': True
         }
