@@ -1,0 +1,11 @@
+version: '2'
+services:
+  bettor:
+    build: ./
+    restart: always
+    env_file:
+      - prod.vars
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "6000:5000"
