@@ -307,7 +307,7 @@ class Bet(Base):
             self.state = BetState.CANCELLED
         self.touch()
 
-    def position_by_user(self, user: User) -> "UserPosition":
+    def position_by_user(self, user: User) -> "Position":
         found = [up for up in self.positions if up.has_user(user)]
         if len(found):
             return found[0]
