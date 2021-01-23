@@ -18,10 +18,10 @@ snapshots['test_myself 1'] = {
                 {
                     'allBets': [
                     ],
-                    'id': '3'
+                    'id': '7'
                 }
             ],
-            'id': '13'
+            'id': '57'
         }
     }
 }

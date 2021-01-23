@@ -36,6 +36,7 @@ class TestEnv:
         )
         for user in self.users:
             self.session.add(user)
+        self.session.add(self.group)
         self.session.add(self.user)
         self.session.commit()
         self.cl = graphene.test.Client(self.schema)

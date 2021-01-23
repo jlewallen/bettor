@@ -13,3 +13,10 @@ checks: env
 tests: env
 	rm -f test*.sqlite3
 	env/bin/python3 -m pytest server/test_*.py
+
+update-test: env
+	rm -f test*.sqlite3
+	env/bin/python3 -m pytest server/test_*.py --snapshot-update
+
+wipe:
+	rm -rf server/snapshots

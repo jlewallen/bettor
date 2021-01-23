@@ -22,19 +22,6 @@ def main():
 
     query = """
     mutation {
-        createGroup(payload: { name: "Hello, world", members: [1] }) {
-            group { id }
-            ok
-        }
-    }
-    """
-
-    res = g.execute(query, context_value={"session": session, "user": jacob})
-    print(jsonpickle.dumps(res, unpicklable=False, indent=4))
-    assert res.errors is None
-
-    query = """
-    mutation {
         createBet(payload: { title: "New bet!", details: "", expiresIn: 60, groupId: 2, minimumTakers: 0, maximumTakers: 3 }) {
             bet { id }
             ok
@@ -58,70 +45,6 @@ def main():
     }
     """
     res = g.execute(query, context_value={"session": session, "user": stephen})
-    print(jsonpickle.dumps(res, unpicklable=False, indent=4))
-    assert res.errors is None
-
-    query = """
-    query {
-        myself {
-            id
-            authoredBets {
-                id
-            }
-            groups {
-                id
-                allBets {
-                    id
-                    author { id }
-                }
-            }
-            friends {
-                id name
-            }
-        }
-    }
-    """
-    res = g.execute(query, context_value={"session": session, "user": jacob})
-    print(jsonpickle.dumps(res, unpicklable=False, indent=4))
-    assert res.errors is None
-
-    query = """
-    query {
-        groups {
-            name
-            allBets {
-                id
-                title
-                details
-                createdAt
-                expiresAt
-                state
-                expired
-                author {
-                    id
-                    name
-                    email
-                }
-                group {
-                    id
-                }
-                positions {
-                    id
-                    title
-                    userPositions {
-                    user { id name email }
-                        createdAt
-                        state
-                    }
-                }
-                messages {
-                    id
-                }
-            }
-        }
-    }
-    """
-    res = g.execute(query, context_value={"session": session, "user": jacob})
     print(jsonpickle.dumps(res, unpicklable=False, indent=4))
     assert res.errors is None
 
