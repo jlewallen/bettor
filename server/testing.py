@@ -22,6 +22,18 @@ class TestEnv:
             )
             for i in range(0, 10)
         ]
+        self.group = models.Group(
+            name="Group",
+            owner=self.user,
+            members=[
+                self.user,
+                self.users[0],
+                self.users[1],
+                self.users[2],
+                self.users[3],
+                self.users[4],
+            ],
+        )
         for user in self.users:
             self.session.add(user)
         self.session.add(self.user)

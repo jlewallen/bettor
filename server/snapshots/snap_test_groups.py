@@ -11,7 +11,12 @@ snapshots['test_create_group 1'] = {
     'data': {
         'createGroup': {
             'group': {
-                'id': '1',
+                'id': '2',
+                'members': [
+                    {
+                        'id': '2'
+                    }
+                ],
                 'name': 'Group'
             },
             'ok': True

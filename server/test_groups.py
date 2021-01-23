@@ -13,6 +13,7 @@ async def test_create_group(snapshot):
             group {
                 id
                 name
+                members { id }
             }
             ok
         }
