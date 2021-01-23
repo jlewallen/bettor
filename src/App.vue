@@ -99,7 +99,7 @@ export default Vue.extend({
 }
 
 .md-app {
-    min-height: 500px;
+    max-height: 100vh;
     border: 1px solid rgba(#000, 0.12);
 }
 
