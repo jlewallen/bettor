@@ -37,8 +37,8 @@ def create_app():
     session_key = base64.b64decode(session_key_string)
 
     google_provider_cfg = get_google_provider_cfg()
+    session = db.create(path="sqlite:///bettor.sqlite3")
     schema = schema_factory.create()
-    session = db.create()
 
     def create_user_from_google_info(
         sub: str = None,
@@ -75,7 +75,7 @@ def create_app():
         user = authenticate()
         body = await quart.request.get_json()
         variables = body["variables"] if "variables" in body else None
-        context = {"session": db.create, "user": user}
+        context = {"session": session, "user": user}
         res = schema.execute(body["query"], context_value=context, variables=variables)
         return res.to_dict()
 

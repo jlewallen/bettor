@@ -7,8 +7,6 @@ import models
 import schema_models as schema
 import db
 
-session = db.create()
-
 
 class CreateGroupAttributes:
     name = graphene.String(required=True)
@@ -28,6 +26,7 @@ class CreateGroup(graphene.Mutation):
 
     @staticmethod
     def mutate(self, info, payload):
+        session = info.context["session"]
         user = info.context["user"]
         group = models.Group(owner=user, members=[user], name=payload.name)
         for id in payload.members:
@@ -61,6 +60,7 @@ class CreateBet(graphene.Mutation):
 
     @staticmethod
     def mutate(self, info, payload):
+        session = info.context["session"]
         user = info.context["user"]
         expires_in = datetime.timedelta(seconds=payload.expires_in)
         expires_at = datetime.datetime.utcnow() + expires_in
@@ -82,6 +82,7 @@ class CreateExamples(graphene.Mutation):
 
     @staticmethod
     def mutate(self, info):
+        session = info.context["session"]
         user = info.context["user"]
         session.add(models.create_examples())
         session.commit()
@@ -106,6 +107,7 @@ class TakePosition(graphene.Mutation):
 
     @staticmethod
     def mutate(self, info, payload):
+        session = info.context["session"]
         user = info.context["user"]
         bet = session.query(models.Bet).get(payload.bet_id)
         bet.take(user, payload.position)
@@ -122,6 +124,7 @@ class CancelPosition(graphene.Mutation):
 
     @staticmethod
     def mutate(self, info, payload):
+        session = info.context["session"]
         user = info.context["user"]
         bet = session.query(models.Bet).get(payload.bet_id)
         bet.cancel(user)
@@ -147,6 +150,7 @@ class SayGroupChat(graphene.Mutation):
 
     @staticmethod
     def mutate(self, info, payload):
+        session = info.context["session"]
         user = info.context["user"]
         group = session.query(models.Group).get(payload.group_id)
         group.touch()
@@ -174,6 +178,7 @@ class SayBetChat(graphene.Mutation):
 
     @staticmethod
     def mutate(self, info, payload):
+        session = info.context["session"]
         user = info.context["user"]
         bet = session.query(models.Bet).get(payload.bet_id)
         bet.touch()
@@ -200,6 +205,7 @@ class RemindBet(graphene.Mutation):
 
     @staticmethod
     def mutate(self, info, payload):
+        session = info.context["session"]
         user = info.context["user"]
         bet = session.query(models.Bet).get(payload.bet_id)
         bet.remind(user)
@@ -225,6 +231,7 @@ class CancelBet(graphene.Mutation):
 
     @staticmethod
     def mutate(self, info, payload):
+        session = info.context["session"]
         user = info.context["user"]
         bet = session.query(models.Bet).get(payload.bet_id)
         bet.cancel(user)
@@ -250,6 +257,7 @@ class Invite(graphene.Mutation):
 
     @staticmethod
     def mutate(self, info, payload):
+        session = info.context["session"]
         user = info.context["user"]
         inviting = (
             session.query(models.User)
@@ -281,6 +289,7 @@ class Remove(graphene.Mutation):
 
     @staticmethod
     def mutate(self, info, payload):
+        session = info.context["session"]
         user = info.context["user"]
         removing = session.query(models.User).get(payload.user_id)
         group = session.query(models.Group).get(payload.group_id)

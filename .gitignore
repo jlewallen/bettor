@@ -30,3 +30,5 @@ pnpm-debug.log*
 /.env
 /env
 __pycache__
+
+*.sqlite3

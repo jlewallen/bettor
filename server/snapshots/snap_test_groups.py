@@ -7,6 +7,14 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['test_create_examples 1'] = {
+    'data': {
+        'createExamples': {
+            'ok': True
+        }
+    }
+}
+
 snapshots['test_create_group 1'] = {
     'data': {
         'createGroup': {

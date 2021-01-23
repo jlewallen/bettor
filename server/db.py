@@ -11,11 +11,12 @@ Base = declarative_base()
 session = None
 
 
-def create():
+def create(path=None, echo=False, **kwargs):
     global session
     if session is None:
-        logging.info("creating database")
-        engine = create_engine("sqlite:///:memory:", echo=True)
+        opening = path if path else "sqlite:///:memory:"
+        logging.info("creating database %s" % (opening,))
+        engine = create_engine(opening, echo=echo)
         Base.metadata.create_all(engine)
 
         session = scoped_session(
@@ -24,4 +25,8 @@ def create():
 
         Base.query = session.query_property()
 
+    return session
+
+
+def get():
     return session

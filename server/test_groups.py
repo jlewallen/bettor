@@ -162,3 +162,21 @@ async def test_invite_user(snapshot):
     )
 
     assert reply["data"]["invite"]["ok"] == True
+
+
+@pytest.mark.asyncio
+@freezegun.freeze_time("2012-01-14")
+async def test_create_examples(snapshot):
+    te = testing.TestEnv()
+    snapshot.assert_match(
+        reply := await te.execute(
+            """
+    mutation {
+        createExamples {
+            ok
+        }
+    }"""
+        )
+    )
+
+    assert reply["data"]["createExamples"]["ok"] == True
