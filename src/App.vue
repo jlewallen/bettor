@@ -107,7 +107,7 @@ export default Vue.extend({
             this.$nextTick(() => {
                 const el = this.$el.querySelector("main");
                 if (el) {
-                    el.scrollTop = el.scrollHeight + 70;
+                    el.scrollTop = el.scrollHeight + 90;
                 }
             });
         },
@@ -115,6 +115,21 @@ export default Vue.extend({
 });
 </script>
 <style lang="scss">
+@import "~vue-material/dist/theme/engine"; // Import the theme engine
+
+@include md-register-theme(
+    "default",
+    (
+        primary: md-get-palette-color(blue, A200),
+        // The primary color of your applicatio
+        accent: md-get-palette-color(red, A200),
+        // The accent or secondary colo
+        theme: dark // This can be dark or ligh,,,,
+    )
+);
+
+@import "~vue-material/dist/theme/all"; // Apply the theme
+
 #app {
     font-family: Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -141,11 +156,6 @@ export default Vue.extend({
     min-height: 100vh;
     max-height: 100vh;
     border: 1px solid rgba(#000, 0.12);
-}
-
-body,
-.md-app .md-content.md-app-content {
-    background-color: #efefef;
 }
 
 .chat-bar {

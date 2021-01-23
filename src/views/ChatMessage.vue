@@ -62,7 +62,7 @@ export default Vue.extend({
     }
     .options-container {
     }
-    background-color: #ffffff;
+    background-color: #212121;
     border-top: 1px solid #afafaf;
     padding-left: 1em;
 }

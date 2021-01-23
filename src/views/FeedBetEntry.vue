@@ -19,11 +19,7 @@
         <UserPhoto :user="entry.bet.modifier" class="feed-photo" />
         <div class="feed-body">
             <div class="bet">
-                <md-card v-bind:class="classObject">
-                    <md-card-media v-if="false">
-                        <!--img src="/assets/examples/card-image-1.jpg" alt="People" /-->
-                    </md-card-media>
-
+                <md-card v-bind:class="classObject" class="md-primary" md-theme="light">
                     <md-card-header>
                         <div class="md-title">{{ entry.bet.title }}</div>
                         <div class="md-subhead">{{ state }}</div>
@@ -183,6 +179,17 @@ export default Vue.extend({
     .md-card {
         .md-card-header {
             background-color: #87cefa;
+        }
+
+        .md-card-actions,
+        .md-card-content {
+            background-color: #ffffff;
+            color: black;
+
+            .md-button,
+            .md-button-content {
+                color: black;
+            }
         }
     }
 

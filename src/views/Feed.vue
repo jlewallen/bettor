@@ -63,7 +63,7 @@ export default Vue.extend({
     height: 100%;
     overflow-y: hidden;
     overflow-x: hidden;
-    margin-bottom: 70px;
+    margin-bottom: 90px;
 
     & .entry.bet {
         &.me {
@@ -74,7 +74,7 @@ export default Vue.extend({
         }
 
         .md-card {
-            max-width: 320px;
+            min-width: 200px;
             margin: 4px;
             display: inline-block;
             vertical-align: top;
