@@ -24,6 +24,19 @@ export default Vue.extend({
             required: true,
         },
     },
+    computed: {
+        feedLength(): number {
+            return this.feed.entries.length;
+        },
+    },
+    watch: {
+        feedLength(after: number, before: number): void {
+            this.$emit("changed");
+        },
+    },
+    mounted() {
+        this.$emit("changed");
+    },
     methods: {
         entryFor(entry: FeedEntry): string {
             const visitor = {
@@ -50,6 +63,7 @@ export default Vue.extend({
     height: 100%;
     overflow-y: hidden;
     overflow-x: hidden;
+    margin-bottom: 70px;
 
     & .entry.bet {
         &.me {

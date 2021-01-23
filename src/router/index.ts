@@ -32,7 +32,7 @@ const routes: Array<RouteConfig> = [
     },
     {
         name: "makeBet",
-        path: "/gropus/:id/make-bet",
+        path: "/groups/:id/make-bet",
         component: MakeBet,
         props: (route) => {
             return {
@@ -49,6 +49,9 @@ const routes: Array<RouteConfig> = [
         name: "group",
         path: "/groups/:id",
         component: Group,
+        meta: {
+            chatLayout: true,
+        },
         props: (route) => {
             return {
                 id: route.params.id,

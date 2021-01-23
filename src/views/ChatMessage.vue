@@ -1,58 +1,69 @@
 <template>
-    <div class="chat-message">
-        <form novalidate v-on:submit.prevent="onSend" class="">
-            <div class="md-layout md-gutter">
-                <div class="md-layout-item md-small-size-100">
-                    <md-field>
-                        <md-input v-model="form.message"></md-input>
-                    </md-field>
-                </div>
-                <div class="md-layout-item md-size-10">
-                    <md-button class="md-primary md-raised" @click="onGoMakeBet">Bet!</md-button>
-                </div>
+    <form novalidate v-on:submit.prevent="onSend" class="">
+        <div class="chat-message">
+            <div class="message-container">
+                <md-field>
+                    <md-input v-model="form.message"></md-input>
+                </md-field>
             </div>
-        </form>
-    </div>
+            <div class="options-container">
+                <md-button class="md-primary md-raised" @click="onGoMakeBet">Bet!</md-button>
+            </div>
+        </div>
+    </form>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import { CreateBetMutationVariables } from "@/store";
+import { SayGroupAction, CreateBetMutationVariables } from "@/store";
 
 export default Vue.extend({
     name: "ChatMessage",
     props: {
         groupId: {
-            type: String,
+            type: String, // ID
             required: true,
         },
     },
     data(): {
-        showBetForm: boolean;
         form: {
             message: string;
         };
     } {
         return {
-            showBetForm: false,
             form: {
                 message: "",
             },
         };
     },
     methods: {
-        onGoMakeBet() {
-            this.$router.push({ name: "makeBet", params: { id: this.groupId } });
-        },
-        onSend(): void {
-            console.log("onSend", this.form);
-            this.$emit("send", this.form);
+        async onSend(): Promise<void> {
+            await this.$store.dispatch(new SayGroupAction(this.groupId, this.form.message));
+
             this.form = {
                 message: "",
             };
+        },
+        onGoMakeBet() {
+            this.$router.push({ name: "makeBet", params: { id: this.groupId } });
         },
     },
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.chat-message {
+    display: flex;
+    .message-container {
+        flex-grow: 1;
+        .md-field {
+            margin: 4px 0 8px;
+        }
+    }
+    .options-container {
+    }
+    background-color: #ffffff;
+    border-top: 1px solid #afafaf;
+    padding-left: 1em;
+}
+</style>

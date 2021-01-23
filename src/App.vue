@@ -2,11 +2,12 @@
     <div class="page-container">
         <md-app md-mode="reveal">
             <md-app-toolbar class="md-primary">
-                <md-button class="md-icon-button" @click="menuVisible = !menuVisible">
+                <md-button class="md-icon-button" @click="toolbar = !toolbar">
                     <md-icon>menu</md-icon>
                 </md-button>
 
-                <span class="md-title">Bettor</span>
+                <span class="md-title" v-if="group">{{ group.name }}</span>
+                <span class="md-title" v-else>Bettor</span>
 
                 <div class="md-toolbar-section-end" v-if="false">
                     <md-button class="md-icon-button">
@@ -15,7 +16,7 @@
                 </div>
             </md-app-toolbar>
 
-            <md-app-drawer :md-active.sync="menuVisible" md-persistent="full">
+            <md-app-drawer :md-active.sync="toolbar" md-persistent="full">
                 <md-toolbar class="md-transparent" md-elevation="0">Navigation</md-toolbar>
 
                 <md-list>
@@ -37,40 +38,72 @@
             </md-app-drawer>
 
             <md-app-content>
-                <router-view />
+                <router-view @feed-changed="feedChanged" />
             </md-app-content>
         </md-app>
+        <div v-if="chatLayout" class="chat-bar">
+            <ChatMessage :groupId="groupId" />
+        </div>
     </div>
 </template>
 <script lang="ts">
 import Vue from "vue";
-import { ActionTypes } from "@/store";
+import { ActionTypes, ID, QueriedGroupFieldsFragment } from "@/store";
+import ChatMessage from "./views/ChatMessage.vue";
 
 export default Vue.extend({
     name: "App",
+    components: {
+        ChatMessage,
+    },
     data(): {
-        menuVisible: boolean;
+        toolbar: boolean;
+        layout: string | null;
     } {
         return {
-            menuVisible: false,
+            toolbar: false,
+            layout: null,
         };
     },
     async mounted() {
         await this.$store.dispatch(ActionTypes.LOAD_USER);
+        console.log(this.$route);
+    },
+    computed: {
+        chatLayout(): boolean {
+            return this.$route.meta?.chatLayout ?? false;
+        },
+        groupId(): ID | null {
+            return this.$route.params.id;
+        },
+        group(): QueriedGroupFieldsFragment | null {
+            if (!this.groupId) {
+                return null;
+            }
+            return this.$store.state.groups[this.groupId];
+        },
     },
     methods: {
         openGroups(): void {
             this.$router.push({ name: "groups" });
-            this.menuVisible = false;
+            this.toolbar = false;
         },
         openProfile(): void {
             this.$router.push({ name: "profile" });
-            this.menuVisible = false;
+            this.toolbar = false;
         },
         addGroup(): void {
             console.log("add-group");
             this.$router.push({ name: "makeGroup" });
-            this.menuVisible = false;
+            this.toolbar = false;
+        },
+        feedChanged(): void {
+            this.$nextTick(() => {
+                const el = this.$el.querySelector("main");
+                if (el) {
+                    el.scrollTop = el.scrollHeight + 70;
+                }
+            });
         },
     },
 });
@@ -99,6 +132,7 @@ export default Vue.extend({
 }
 
 .md-app {
+    min-height: 100vh;
     max-height: 100vh;
     border: 1px solid rgba(#000, 0.12);
 }
@@ -106,5 +140,12 @@ export default Vue.extend({
 body,
 .md-app .md-content.md-app-content {
     background-color: #efefef;
+}
+
+.chat-bar {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
 }
 </style>

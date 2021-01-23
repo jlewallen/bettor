@@ -153,6 +153,7 @@ class SayGroupChat(graphene.Mutation):
         session = info.context["session"]
         user = info.context["user"]
         group = session.query(models.Group).get(payload.group_id)
+        assert group
         group.touch()
         message = models.GroupChat(group=group, message=payload.message, author=user)
         session.add(message)

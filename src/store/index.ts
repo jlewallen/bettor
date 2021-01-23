@@ -148,9 +148,7 @@ export class Feed {
         const messages: FeedEntry[] = chats.map((c) => new ChatEntry(c!));
         this.id = group.id;
         this.entries = _.sortBy(_.flatten([bets, messages]), (e) => e.time);
-        console.log(`group`, group);
-        console.log(`chats`, chats);
-        console.log(`feed`, this.entries);
+        console.log(`feed`, { entries: this.entries, group, chats });
     }
 
     public appendChat(message: GroupChatMessageFieldsFragment): Feed {
