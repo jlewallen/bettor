@@ -28,7 +28,7 @@ pnpm-debug.log*
 *.sw?
 
 /.env
-/.vars
+/*.vars
 /env
 __pycache__
 
