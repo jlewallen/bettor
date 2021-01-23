@@ -27,6 +27,13 @@ bet_watchers = Table(
     Column("watched", DateTime, nullable=False, default=datetime.datetime.utcnow),
 )
 
+friendship = Table(
+    "friendship",
+    Base.metadata,
+    Column("friend_a_id", ForeignKey("users.id"), primary_key=True),
+    Column("friend_b_id", ForeignKey("users.id"), primary_key=True),
+)
+
 
 class User(Base):
     __tablename__ = "users"
@@ -42,6 +49,12 @@ class User(Base):
 
     created_groups = relationship("Group", back_populates="owner")
     groups = relationship("Group", secondary=group_members, back_populates="members")
+    friends = relationship(
+        "User",
+        secondary=friendship,
+        primaryjoin=id == friendship.c.friend_a_id,
+        secondaryjoin=id == friendship.c.friend_b_id,
+    )
     authored_bets = relationship("Bet", back_populates="author")
 
     watched_bets = relationship(
@@ -52,6 +65,16 @@ class User(Base):
 
     def touch(self):
         self.activity_at = datetime.datetime.utcnow()
+
+    def befriend(self, friend):
+        if friend not in self.friends:
+            self.friends.append(friend)
+            friend.friends.append(self)
+
+    def unfriend(self, friend):
+        if friend in self.friends:
+            self.friends.remove(friend)
+            friend.friends.remove(self)
 
     def __repr__(self) -> str:
         return "<User(id='%s', name='%s', picture='%s')>" % (
@@ -404,6 +427,12 @@ def create_examples():
     derek = User(sub="", name="Derek", email="derek@example.com")
     zack = User(sub="", name="Zack", email="zack@example.com")
     scott = User(sub="", name="Scott", email="scott@example.com")
+
+    for f in [stephen, jacob, jimmy, derek, zack, scott]:
+        if f != stephen:
+            stephen.befriend(f)
+        if f != jacob:
+            jacob.befriend(f)
 
     standard_expiration = datetime.timedelta(minutes=60)
     group_epoch = datetime.datetime.utcnow()

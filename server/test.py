@@ -75,6 +75,9 @@ def main():
                     author { id }
                 }
             }
+            friends {
+                id name
+            }
         }
     }
     """
