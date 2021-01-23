@@ -6,6 +6,7 @@ import Profile from "../views/Profile.vue";
 import Group from "../views/Group.vue";
 import MakeBet from "../views/MakeBet.vue";
 import MakeGroup from "../views/MakeGroup.vue";
+import EditGroup from "../views/EditGroup.vue";
 
 Vue.use(VueRouter);
 
@@ -51,6 +52,19 @@ const routes: Array<RouteConfig> = [
         component: Group,
         meta: {
             chatLayout: true,
+        },
+        props: (route) => {
+            return {
+                id: route.params.id,
+            };
+        },
+    },
+    {
+        name: "editGroup",
+        path: "/groups/:id/edit",
+        component: EditGroup,
+        meta: {
+            chatLayout: false,
         },
         props: (route) => {
             return {

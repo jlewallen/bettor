@@ -1,7 +1,6 @@
 <template>
-    <div class="make-group">
-        <PeoplePicker class="" @cancel="onCancel" @done="haveMembers" v-if="form.members.length == 0" />
-        <form class="container" @submit.prevent="validate" v-else>
+    <div class="group" v-if="group && self">
+        <form class="container" @submit.prevent="validate">
             <md-card class="md-layout-item md-size-100 md-small-size-100">
                 <md-card-content>
                     <div class="md-layout md-gutter">
@@ -16,7 +15,7 @@
                 </md-card-content>
                 <md-card-actions>
                     <md-button type="button" class="md-primary" @click="onCancel">Cancel</md-button>
-                    <md-button type="submit" class="md-primary" :disabled="busy">Make</md-button>
+                    <md-button type="submit" class="md-primary" :disabled="busy">Save</md-button>
                 </md-card-actions>
             </md-card>
         </form>
@@ -24,31 +23,37 @@
 </template>
 
 <script lang="ts">
-import _ from "lodash";
-import Vue from "vue";
-import PeoplePicker from "./PeoplePicker.vue";
-import { UserRefFragment, CreateGroupMutationVariables, CreateGroupAction } from "@/store";
+import Vue, { PropType } from "vue";
+
+import { authenticated, ID, LoadGroupAction, Group, UserRefFragment } from "@/store";
+
 import { validationMixin } from "vuelidate";
 import { required } from "vuelidate/lib/validators";
 
 export default Vue.extend({
-    name: "MakeGroup",
+    name: "EditGroup",
     mixins: [validationMixin],
-    components: {
-        PeoplePicker,
+    components: {},
+    props: {
+        id: {
+            type: String, // ID
+            required: true,
+        },
     },
     data(): {
+        loaded: boolean;
+        loading: boolean;
         busy: boolean;
         form: {
             name: string;
-            members: UserRefFragment[];
         };
     } {
         return {
+            loaded: false,
+            loading: false,
             busy: false,
             form: {
                 name: "",
-                members: [],
             },
         };
     },
@@ -59,8 +64,29 @@ export default Vue.extend({
             },
         },
     },
-    mounted() {
-        console.log("make-group: mounted");
+    computed: {
+        self(): UserRefFragment {
+            return this.$store.state.self;
+        },
+        group(): Group {
+            return this.$store.state.groups[this.id];
+        },
+    },
+    async mounted() {
+        if (!authenticated()) {
+            this.$router.push("/login");
+            return;
+        }
+        if (!this.loaded) {
+            this.loading = true;
+            await this.$store.dispatch(new LoadGroupAction(this.id));
+            this.loading = false;
+            this.loaded = true;
+        }
+
+        this.form = {
+            name: this.group.name,
+        };
     },
     methods: {
         getValidationClass(fieldName: string): Record<string, boolean> {
@@ -78,38 +104,18 @@ export default Vue.extend({
             this.$v.$touch();
 
             if (!this.$v.$invalid) {
-                this.onMake();
-            }
-        },
-        async onMake() {
-            this.busy = true;
-            try {
-                const vars: CreateGroupMutationVariables = {
-                    name: this.form.name,
-                    members: this.form.members.map((m) => m.id),
-                };
-                console.log("onMake", vars);
-                await this.$store.dispatch(new CreateGroupAction(vars));
-                this.$router.push({
-                    name: "group",
-                    params: {
-                        id: this.$store.state.refreshedGroup,
-                    },
-                });
-            } catch (err) {
-                console.log(err);
-            } finally {
-                this.busy = false;
+                // this.onMake();
             }
         },
         onCancel() {
             console.log("cancel");
             this.$router.go(-1);
         },
-        haveMembers(members: UserRefFragment[]) {
-            console.log("have-members", members);
-            this.form.members = members;
-        },
     },
 });
 </script>
+
+<style lang="scss">
+.group {
+}
+</style>
