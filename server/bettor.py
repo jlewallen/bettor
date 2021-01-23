@@ -139,7 +139,7 @@ def get_config():
     auth_callback_url = os.getenv("BETTOR_AUTH_CALLBACK_URL")
 
     return {
-        "path": path if path else "sqlite:///bettor.sqlite3",
+        "path": path if path else "sqlite:///data/bettor.sqlite3",
         "auth_callback_url": auth_callback_url
         if auth_callback_url
         else "http://127.0.0.1:8082/callback",
