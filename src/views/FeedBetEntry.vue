@@ -4,7 +4,7 @@
             :md-active.sync="cancel"
             md-title="Cancel?"
             md-content="Are you sure you want to cancel?"
-            md-confirm-text="Cancel"
+            md-confirm-text="Yes"
             md-cancel-text="Nevermind"
             @md-confirm="onCancel"
         />
@@ -13,7 +13,7 @@
             md-title="Take?"
             md-content="Are you sure you want to take this bet?"
             md-confirm-text="Take"
-            md-cancel-text="No no"
+            md-cancel-text="No way"
             @md-confirm="onTake(taking)"
         />
         <UserPhoto :user="entry.bet.modifier" class="feed-photo" />
