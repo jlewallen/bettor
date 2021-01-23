@@ -29,7 +29,7 @@ def get_google_provider_cfg():
     ).json()
 
 
-def create_app(path=None):
+def create_app(path=None, auth_callback_url=None, prod=False):
     app = quart.Quart(__name__, static_folder=os.path.abspath("dist"))
     app = quart_cors.cors(app)
 
@@ -88,7 +88,7 @@ def create_app(path=None):
         authorization_endpoint = google_provider_cfg["authorization_endpoint"]
         request_uri = client.prepare_request_uri(
             authorization_endpoint,
-            redirect_uri="http://127.0.0.1:8082/callback",
+            redirect_uri=auth_callback_url,
             scope=["openid", "email", "profile"],
         )
         return jsonpickle.dumps({"url": request_uri})
@@ -101,7 +101,7 @@ def create_app(path=None):
         client = oauthlib.oauth2.WebApplicationClient(google_client_id)
         token_url, headers, body = client.prepare_token_request(
             google_provider_cfg["token_endpoint"],
-            redirect_url="http://127.0.0.1:8082/callback",
+            redirect_url=auth_callback_url,
             code=code,
         )
         token_response = requests.post(
@@ -136,9 +136,13 @@ def create_app(path=None):
 
 def get_config():
     path = os.getenv("BETTOR_PATH")
+    auth_callback_url = os.getenv("BETTOR_AUTH_CALLBACK_URL")
 
     return {
         "path": path if path else "sqlite:///bettor.sqlite3",
+        "auth_callback_url": auth_callback_url
+        if auth_callback_url
+        else "http://127.0.0.1:8082/callback",
         "prod": os.getenv("BETTOR_PROD") != None,
     }
 
@@ -154,7 +158,7 @@ def main():
 
     cfg = get_config()
 
-    app = create_app(path=cfg["path"])
+    app = create_app(**cfg)
 
     if cfg["prod"]:
         config = Config()
