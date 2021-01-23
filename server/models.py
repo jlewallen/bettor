@@ -3,6 +3,7 @@ from typing import List, Any, Union, Optional
 from sqlalchemy import Column, Integer, String, Table, Text, ForeignKey, DateTime, Enum
 from sqlalchemy.orm import relationship
 
+import logging
 import datetime
 import enum
 import lorem

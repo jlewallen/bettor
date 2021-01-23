@@ -11,10 +11,10 @@ snapshots['test_create_group 1'] = {
     'data': {
         'createGroup': {
             'group': {
-                'id': '3',
+                'id': '5',
                 'members': [
                     {
-                        'id': '13'
+                        'id': '35'
                     }
                 ],
                 'name': 'Group'
@@ -51,23 +51,30 @@ snapshots['test_group_chat_hello_and_query 2'] = {
         'groupChat': [
             {
                 'author': {
-                    'id': '46',
+                    'id': '68',
                     'name': 'Lori Singleton',
                     'picture': None
                 },
                 'id': '2',
                 'message': 'Hello, there'
-            },
-            {
-                'author': {
-                    'id': '35',
-                    'name': 'Lori Singleton',
-                    'picture': None
-                },
-                'id': '1',
-                'message': 'Hello, there'
             }
         ]
+    }
+}
+
+snapshots['test_invite_no_user 1'] = {
+    'data': {
+        'invite': {
+            'ok': False
+        }
+    }
+}
+
+snapshots['test_invite_user 1'] = {
+    'data': {
+        'invite': {
+            'ok': True
+        }
     }
 }
 

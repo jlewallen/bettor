@@ -40,7 +40,9 @@ class TestEnv:
         self.session.add(self.user)
         self.session.commit()
         self.cl = graphene.test.Client(self.schema)
-        self.context = {"session": self.session, "user": self.user}
 
-    async def execute(self, query, **kwargs):
-        return self.cl.execute(query, context_value=self.context)
+    async def execute(self, query, user=None, **kwargs):
+        if not user:
+            user = self.user
+        context = {"session": self.session, "user": user}
+        return self.cl.execute(query, context_value=context)

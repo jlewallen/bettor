@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -12,6 +14,7 @@ session = None
 def create():
     global session
     if session is None:
+        logging.info("creating database")
         engine = create_engine("sqlite:///:memory:", echo=True)
         Base.metadata.create_all(engine)
 

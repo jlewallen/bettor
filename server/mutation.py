@@ -1,3 +1,4 @@
+import logging
 import graphene
 import datetime
 
@@ -63,10 +64,11 @@ class CreateBet(graphene.Mutation):
         user = info.context["user"]
         expires_in = datetime.timedelta(seconds=payload.expires_in)
         expires_at = datetime.datetime.utcnow() + expires_in
+        group = session.query(models.Group).get(payload.group_id)
         bet = models.Bet.arbitrary(
             author=user,
             title=payload.title,
-            group_id=payload.group_id,
+            group=group,
             expires_at=expires_at,
             minimum_takers=payload.minimum_takers,
             maximum_takers=payload.maximum_takers,
@@ -254,6 +256,8 @@ class Invite(graphene.Mutation):
             .filter(models.User.email == payload.email)
             .first()
         )
+        if not inviting:
+            return CancelBet(ok=False)
         group = session.query(models.Group).get(payload.group_id)
         group.invite(inviting)
         session.commit()
