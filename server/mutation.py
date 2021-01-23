@@ -9,11 +9,12 @@ import storage
 session = storage.create()
 
 
-class GroupAttribute:
+class CreateGroupAttributes:
     name = graphene.String(required=True)
+    members = graphene.List(graphene.NonNull(graphene.ID), required=True)
 
 
-class CreateGroupPayload(graphene.InputObjectType, GroupAttribute):
+class CreateGroupPayload(graphene.InputObjectType, CreateGroupAttributes):
     pass
 
 
@@ -27,8 +28,11 @@ class CreateGroup(graphene.Mutation):
     @staticmethod
     def mutate(self, info, payload):
         user = info.context["user"]
-        data = utils.input_to_dictionary(payload)
-        group = models.Group(owner=user, members=[user], **data)
+        group = models.Group(owner=user, members=[user], name=payload.name)
+        for id in payload.members:
+            member = session.query(models.User).get(id)
+            if member not in group.members:
+                group.members.append(member)
         session.commit()
         return CreateGroup(group=group, ok=True)
 

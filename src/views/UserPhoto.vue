@@ -3,9 +3,9 @@
         <img :src="user.picture" />
     </md-avatar>
     <md-avatar v-else>
-        <md-avatar class="md-avatar-icon">{{ user.name[0] }}</md-avatar>
-        <md-avatar class="md-avatar-icon md-primary">{{ user.name[0] }}</md-avatar>
-        <md-avatar class="md-avatar-icon md-accent">{{ user.name[0] }}</md-avatar>
+        <md-avatar class="md-avatar-icon md-primary" v-if="selected">{{ user.name[0] }}</md-avatar>
+        <md-avatar class="md-avatar-icon md-accent" v-else-if="false">{{ user.name[0] }}</md-avatar>
+        <md-avatar class="md-avatar-icon" v-else>{{ user.name[0] }}</md-avatar>
     </md-avatar>
 </template>
 
@@ -19,6 +19,10 @@ export default Vue.extend({
         user: {
             type: Object as PropType<UserRefFragment>,
             required: true,
+        },
+        selected: {
+            type: Boolean,
+            default: false,
         },
     },
 });

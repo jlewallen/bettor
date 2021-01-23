@@ -246,6 +246,7 @@ export type CreateGroup = {
 
 export type CreateGroupPayload = {
   name: Scalars['String'];
+  members: Array<Scalars['ID']>;
 };
 
 export type CreateBet = {
@@ -509,6 +510,10 @@ export type QuerySelfQuery = (
   { __typename?: 'Query' }
   & { myself?: Maybe<(
     { __typename?: 'User' }
+    & { friends?: Maybe<Array<(
+      { __typename?: 'User' }
+      & UserRefFragment
+    )>> }
     & UserRefFragment
   )> }
 );
@@ -637,6 +642,24 @@ export type RemindBetMutation = (
     & { bet?: Maybe<(
       { __typename?: 'Bet' }
       & QueriedBetFieldsFragment
+    )> }
+  )> }
+);
+
+export type CreateGroupMutationVariables = Exact<{
+  name: Scalars['String'];
+  members: Array<Scalars['ID']> | Scalars['ID'];
+}>;
+
+
+export type CreateGroupMutation = (
+  { __typename?: 'Mutation' }
+  & { createGroup?: Maybe<(
+    { __typename?: 'CreateGroup' }
+    & Pick<CreateGroup, 'ok'>
+    & { group?: Maybe<(
+      { __typename?: 'Group' }
+      & QueriedGroupFieldsFragment
     )> }
   )> }
 );
@@ -789,6 +812,9 @@ export const QuerySelfDocument = gql`
     query querySelf {
   myself {
     ...UserRef
+    friends {
+      ...UserRef
+    }
   }
 }
     ${UserRefFragmentDoc}`;
@@ -864,6 +890,16 @@ export const RemindBetDocument = gql`
   }
 }
     ${QueriedBetFieldsFragmentDoc}`;
+export const CreateGroupDocument = gql`
+    mutation createGroup($name: String!, $members: [ID!]!) {
+  createGroup(payload: {name: $name, members: $members}) {
+    ok
+    group {
+      ...QueriedGroupFields
+    }
+  }
+}
+    ${QueriedGroupFieldsFragmentDoc}`;
 
 export type SdkFunctionWrapper = <T>(action: () => Promise<T>) => Promise<T>;
 
@@ -912,6 +948,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     remindBet(variables: RemindBetMutationVariables, requestHeaders?: Headers): Promise<RemindBetMutation> {
       return withWrapper(() => client.request<RemindBetMutation>(print(RemindBetDocument), variables, requestHeaders));
+    },
+    createGroup(variables: CreateGroupMutationVariables, requestHeaders?: Headers): Promise<CreateGroupMutation> {
+      return withWrapper(() => client.request<CreateGroupMutation>(print(CreateGroupDocument), variables, requestHeaders));
     }
   };
 }

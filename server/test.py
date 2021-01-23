@@ -22,7 +22,7 @@ def main():
 
     query = """
     mutation {
-        createGroup(payload: { name: "Hello, world" }) {
+        createGroup(payload: { name: "Hello, world", members: [1] }) {
             group { id }
             ok
         }

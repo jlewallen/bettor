@@ -7,10 +7,6 @@
                 </md-button>
 
                 <span class="md-title">Bettor</span>
-
-                <md-button class="md-icon-button" @click="addGroup">
-                    <md-icon>add</md-icon>
-                </md-button>
             </md-app-toolbar>
 
             <md-app-drawer :md-active.sync="menuVisible" md-persistent="full">
@@ -20,6 +16,11 @@
                     <md-list-item @click="openGroups">
                         <md-icon>move_to_inbox</md-icon>
                         <span class="md-list-item-text">Groups</span>
+                    </md-list-item>
+
+                    <md-list-item @click="addGroup">
+                        <md-icon>move_to_inbox</md-icon>
+                        <span class="md-list-item-text">New Group</span>
                     </md-list-item>
 
                     <md-list-item @click="openProfile">
@@ -37,6 +38,7 @@
 </template>
 <script lang="ts">
 import Vue from "vue";
+import { ActionTypes } from "@/store";
 
 export default Vue.extend({
     name: "App",
@@ -46,6 +48,9 @@ export default Vue.extend({
         return {
             menuVisible: false,
         };
+    },
+    async mounted() {
+        await this.$store.dispatch(ActionTypes.LOAD_USER);
     },
     methods: {
         openGroups(): void {

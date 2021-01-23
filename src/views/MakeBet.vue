@@ -32,7 +32,7 @@ export default Vue.extend({
         async onMake(bet: CreateBetMutationVariables) {
             this.busy = true;
             try {
-                console.log("onBet", this.id, bet);
+                console.log("onMake", this.id, bet);
                 await this.$store.dispatch(new CreateBetAction(_.extend({ groupId: this.id }, bet)));
                 this.$router.go(-1);
             } catch (err) {

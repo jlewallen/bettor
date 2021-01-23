@@ -1,12 +1,13 @@
 <template>
     <div class="">
-        <form class="container" @submit.prevent="validate">
+        <PeoplePicker class="" @cancel="onCancel" @done="haveMembers" v-if="form.members.length == 0" />
+        <form class="container" @submit.prevent="validate" v-else>
             <md-card class="md-layout-item md-size-100 md-small-size-100">
                 <md-card-content>
                     <div class="md-layout md-gutter">
                         <div class="md-layout-item md-small-size-100">
                             <md-field :class="getValidationClass('name')">
-                                <label>What's the bet?</label>
+                                <label>Group name?</label>
                                 <md-input v-model="form.name"></md-input>
                                 <span class="md-error" v-if="!$v.form.name.required">Name is required</span>
                             </md-field>
@@ -25,24 +26,29 @@
 <script lang="ts">
 import _ from "lodash";
 import Vue from "vue";
-// import MakeBetForm from "./MakeBetForm.vue";
-// import { CreateBetMutationVariables, CreateBetAction } from "@/store";
+import PeoplePicker from "./PeoplePicker.vue";
+import { UserRefFragment, CreateGroupMutationVariables, CreateGroupAction } from "@/store";
 import { validationMixin } from "vuelidate";
 import { required } from "vuelidate/lib/validators";
 
 export default Vue.extend({
     name: "MakeGroup",
     mixins: [validationMixin],
+    components: {
+        PeoplePicker,
+    },
     data(): {
         busy: boolean;
         form: {
             name: string;
+            members: UserRefFragment[];
         };
     } {
         return {
             busy: false,
             form: {
                 name: "",
+                members: [],
             },
         };
     },
@@ -52,6 +58,9 @@ export default Vue.extend({
                 required,
             },
         },
+    },
+    mounted() {
+        console.log("make-group: mounted");
     },
     methods: {
         getValidationClass(fieldName: string): Record<string, boolean> {
@@ -75,9 +84,18 @@ export default Vue.extend({
         async onMake() {
             this.busy = true;
             try {
-                // console.log("onBet", this.id, bet);
-                // await this.$store.dispatch(new CreateBetAction(_.extend({ groupId: this.id }, bet)));
-                // this.$router.go(-1);
+                const vars: CreateGroupMutationVariables = {
+                    name: this.form.name,
+                    members: this.form.members.map((m) => m.id),
+                };
+                console.log("onMake", vars);
+                await this.$store.dispatch(new CreateGroupAction(vars));
+                this.$router.push({
+                    name: "group",
+                    params: {
+                        id: this.$store.state.refreshedGroup,
+                    },
+                });
             } catch (err) {
                 console.log(err);
             } finally {
@@ -85,8 +103,12 @@ export default Vue.extend({
             }
         },
         onCancel() {
-            console.log("onCancel");
+            console.log("cancel");
             this.$router.go(-1);
+        },
+        haveMembers(members: UserRefFragment[]) {
+            console.log("have-members", members);
+            this.form.members = members;
         },
     },
 });

@@ -24,13 +24,13 @@ fragment UserRef on User {
 }
 
 fragment ListedGroupFields on Group {
-	id
-	owner {
-	  ...UserRef
-	}
-	name
-	activityAt
-	picture
+  id
+  owner {
+	...UserRef
+  }
+  name
+  activityAt
+  picture
 }
 
 query queryGroups {
@@ -121,6 +121,9 @@ query queryBetChat($betId: ID!, $page: Int!) {
 query querySelf {
   myself {
 	...UserRef
+	friends {
+	  ...UserRef
+	}
   }
 }
 
@@ -143,18 +146,18 @@ mutation sayBetChat($betId: ID!, $message: String) {
 }
 
 mutation createBet($groupId: ID!,
-				   $title: String!,
-				   $expiresIn: Int!,
-				   $details: String!,
-				   $minimumTakers: Int!,
-				   $maximumTakers: Int!) {
+  $title: String!,
+  $expiresIn: Int!,
+  $details: String!,
+  $minimumTakers: Int!,
+  $maximumTakers: Int!) {
   createBet(payload: {
-	groupId: $groupId,
-	title: $title,
-	expiresIn: $expiresIn,
-	details: $details,
-	minimumTakers: $minimumTakers,
-	maximumTakers: $maximumTakers}) {
+	  groupId: $groupId,
+	  title: $title,
+	  expiresIn: $expiresIn,
+	  details: $details,
+	  minimumTakers: $minimumTakers,
+	  maximumTakers: $maximumTakers}) {
 	ok
 	bet {
 	  ...QueriedBetFields
@@ -194,6 +197,19 @@ mutation remindBet($betId: ID!) {
 	ok
 	bet {
 	  ...QueriedBetFields
+	}
+  }
+}
+
+mutation createGroup(
+  $name: String!,
+  $members: [ID!]!) {
+  createGroup(payload: {
+	  name: $name,
+	  members: $members }) {
+	ok
+	group {
+	  ...QueriedGroupFields
 	}
   }
 }

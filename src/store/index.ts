@@ -13,6 +13,7 @@ import {
     GroupChatMessageFieldsFragment,
     QueriedBetFieldsFragment,
     CreateBetMutationVariables,
+    CreateGroupMutationVariables,
 } from "../http";
 
 export { authenticated, Group, Bet, LoginPerson };
@@ -41,6 +42,7 @@ export enum ActionTypes {
     TAKE_POSITION = "TAKE_POSITION",
     CANCEL_POSITION = "CANCEL_POSITION",
     CANCEL_BET = "CANCEL_BET",
+    CREATE_GROUP = "CREATE_GROUP",
 }
 
 export class LoadGroupAction {
@@ -71,6 +73,12 @@ export class CreateBetAction {
     type = ActionTypes.CREATE_BET;
 
     constructor(public readonly vars: CreateBetMutationVariables) {}
+}
+
+export class CreateGroupAction {
+    type = ActionTypes.CREATE_GROUP;
+
+    constructor(public readonly vars: CreateGroupMutationVariables) {}
 }
 
 export class CancelBetAction {
@@ -160,7 +168,8 @@ export class State {
         // Wish we could use ID here.
         public readonly groups: { [id: string]: ListedGroupFieldsFragment } = {},
         public readonly bets: { [id: string]: Bet } = {},
-        public readonly feeds: { [id: string]: Feed } = {}
+        public readonly feeds: { [id: string]: Feed } = {},
+        public refreshedGroup: string | null = null
     ) {}
 }
 
@@ -174,13 +183,13 @@ export default new Vuex.Store({
             Vue.set(state, "self", self);
         },
         [MutationTypes.REFRESH_GROUP]: (state: State, group: QueriedGroupFieldsFragment): void => {
+            Vue.set(state.groups, group.id, group);
             if (group.allBets) {
                 for (const bet of group.allBets) {
-                    if (bet) {
-                        Vue.set(state.bets, bet.id, bet);
-                    }
+                    Vue.set(state.bets, bet.id, bet);
                 }
             }
+            state.refreshedGroup = group.id;
         },
         [MutationTypes.REFRESH_GROUPS]: (state: State, groups: ListedGroupFieldsFragment[]): void => {
             const incoming = _.keyBy(groups, (g) => g.id);
@@ -208,6 +217,7 @@ export default new Vuex.Store({
 
             const self = await api.querySelf();
             if (self.myself) {
+                console.log("refresh-self", self);
                 commit(MutationTypes.REFRESH_SELF, self.myself);
             }
 
@@ -218,6 +228,12 @@ export default new Vuex.Store({
             }
 
             commit(MutationTypes.REFRESH_GROUPS, groups.groups);
+        },
+        [ActionTypes.CREATE_GROUP]: async ({ commit, dispatch, state }, payload: CreateGroupAction) => {
+            const api = getApi();
+            const reply = await api.createGroup(payload.vars);
+            const group = reply.createGroup?.group;
+            commit(MutationTypes.REFRESH_GROUP, group);
         },
         [ActionTypes.LOAD_GROUP]: async ({ commit, dispatch, state }, payload: LoadGroupAction) => {
             const api = getApi();

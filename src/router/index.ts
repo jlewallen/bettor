@@ -41,6 +41,11 @@ const routes: Array<RouteConfig> = [
         },
     },
     {
+        name: "makeGroup",
+        path: "/groups/make",
+        component: MakeGroup,
+    },
+    {
         name: "group",
         path: "/groups/:id",
         component: Group,
@@ -49,11 +54,6 @@ const routes: Array<RouteConfig> = [
                 id: route.params.id,
             };
         },
-    },
-    {
-        name: "makeGroup",
-        path: "/groups/make",
-        component: MakeGroup,
     },
     {
         path: "/profile",

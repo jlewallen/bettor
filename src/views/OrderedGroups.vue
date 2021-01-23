@@ -7,8 +7,6 @@
                     <span>{{ group.name }}</span>
                 </div>
             </md-list-item>
-
-            <md-divider class="md-inset"></md-divider>
         </md-list>
     </div>
 </template>
