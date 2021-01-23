@@ -11,6 +11,8 @@ import random
 
 from db import Base
 
+log = logging.getLogger("bettor")
+
 group_members = Table(
     "group_members",
     Base.metadata,

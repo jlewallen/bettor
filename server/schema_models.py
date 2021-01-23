@@ -1,10 +1,12 @@
 from typing import Union
 
+import logging
 import graphene
 import graphene_sqlalchemy
 
-
 import models
+
+log = logging.getLogger("bettor")
 
 
 class ActiveSQLAlchemyObjectType(graphene_sqlalchemy.SQLAlchemyObjectType):

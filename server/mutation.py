@@ -7,6 +7,8 @@ import models
 import schema_models as schema
 import db
 
+log = logging.getLogger("bettor")
+
 
 class CreateGroupAttributes:
     name = graphene.String(required=True)

@@ -22,6 +22,8 @@ import models
 import db
 import schema as schema_factory
 
+log = logging.getLogger("bettor")
+
 
 def get_google_provider_cfg():
     return requests.get(
@@ -29,7 +31,7 @@ def get_google_provider_cfg():
     ).json()
 
 
-def create_app(path=None, auth_callback_url=None, prod=False):
+def create_app(path=None, auth_callback_url=None, prod=False, echo=False):
     app = quart.Quart(__name__, static_folder=os.path.abspath("dist"))
     app = quart_cors.cors(app)
 
@@ -40,7 +42,7 @@ def create_app(path=None, auth_callback_url=None, prod=False):
     session_key = base64.b64decode(session_key_string)
 
     google_provider_cfg = get_google_provider_cfg()
-    session = db.create(path=path)
+    session = db.create(path=path, echo=echo)
     schema = schema_factory.create()
 
     def create_user_from_google_info(
@@ -126,9 +128,9 @@ def create_app(path=None, auth_callback_url=None, prod=False):
             path = "index.html"
         file_path = "dist/" + path
         if os.path.isfile(file_path):
-            logging.info("sending %s", file_path)
+            log.info("sending %s", file_path)
             return await app.send_static_file(path)
-        logging.info("sending default")
+        log.info("sending default")
         return await app.send_static_file("index.html")
 
     return app
@@ -144,17 +146,24 @@ def get_config():
         if auth_callback_url
         else "http://127.0.0.1:8082/callback",
         "prod": os.getenv("BETTOR_PROD") != None,
+        "echo": True,
     }
 
 
 def main():
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        handlers=[
-            logging.StreamHandler(),
-        ],
+        format="%(asctime)s %(levelname)s %(message)s",
+        handlers=[],
     )
+
+    sh = logging.StreamHandler()
+    sh.setFormatter(
+        logging.Formatter(
+            "%(asctime)s %(levelname)s %(message)s",
+        )
+    )
+    log.handlers = [sh]
 
     cfg = get_config()
 
