@@ -8,7 +8,7 @@ import enum
 import lorem
 import random
 
-from storage import Base
+from db import Base
 
 group_members = Table(
     "group_members",

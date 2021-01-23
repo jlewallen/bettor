@@ -3,16 +3,16 @@ import lorem
 import faker
 
 import models
-import storage
-import gql
+import schema as schema_factory
+import db
 
 
 class TestEnv:
     def __init__(self):
         self.faker = faker.Faker()
         self.faker.seed_instance(823124)
-        self.schema = gql.create()
-        self.session = storage.create()
+        self.schema = schema_factory.create()
+        self.session = db.create()
         self.user = models.User(
             sub="user-main", name=self.faker.name(), email=self.faker.email()
         )

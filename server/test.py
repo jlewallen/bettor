@@ -5,20 +5,20 @@ import logging
 import datetime
 import jsonpickle
 
-import storage
+import db
 import models
-import gql
+import schema as schema_factory
 
 
 def main():
-    session = storage.create()
+    session = db.create()
     session.add(models.create_examples())
     session.commit()
 
     jacob = session.query(models.User).get(1)
     stephen = session.query(models.User).get(2)
 
-    g = gql.create()
+    g = schema_factory.create()
 
     query = """
     mutation {

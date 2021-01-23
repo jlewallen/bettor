@@ -3,10 +3,10 @@ import datetime
 
 import utils
 import models
-import schema
-import storage
+import schema_models as schema
+import db
 
-session = storage.create()
+session = db.create()
 
 
 class CreateGroupAttributes:

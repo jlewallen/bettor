@@ -16,8 +16,8 @@ import oauthlib.oauth2
 import requests
 
 import models
-import storage
-import gql
+import db
+import schema as schema_factory
 
 
 def get_google_provider_cfg():
@@ -37,8 +37,8 @@ def create_app():
     session_key = base64.b64decode(session_key_string)
 
     google_provider_cfg = get_google_provider_cfg()
-    g = gql.create()
-    session = storage.create()
+    schema = schema_factory.create()
+    session = db.create()
 
     def create_user_from_google_info(
         sub: str = None,
@@ -67,16 +67,16 @@ def create_app():
 
     @app.route("/v1/graphql", methods=["GET"])
     async def introspection():
-        print(str(g))
-        return {"data": g.introspect()}
+        print(str(schema))
+        return {"data": schema.introspect()}
 
     @app.route("/v1/graphql", methods=["POST"])
     async def graphql():
         user = authenticate()
         body = await quart.request.get_json()
         variables = body["variables"] if "variables" in body else None
-        context = {"session": storage.create, "user": user}
-        res = g.execute(body["query"], context_value=context, variables=variables)
+        context = {"session": db.create, "user": user}
+        res = schema.execute(body["query"], context_value=context, variables=variables)
         return res.to_dict()
 
     @app.route("/v1/login", methods=["GET"])
