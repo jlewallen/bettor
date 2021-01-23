@@ -9,5 +9,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN npm install
 COPY . .
 RUN npm run build
-RUN mv dist static
 CMD [ "python", "/app/server/bettor.py" ]
