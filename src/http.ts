@@ -21,7 +21,7 @@ export function authenticated(): boolean {
 }
 
 export function getApi() {
-    const gqlc = new GraphQLClient("http://127.0.0.1:5000/v1/graphql", {
+    const gqlc = new GraphQLClient(Config.baseUrl + "/graphql", {
         headers: getAuthHeaders(),
     });
     return getSdk(gqlc);
@@ -54,7 +54,7 @@ export async function http<T>(info: OurRequestInfo): Promise<T> {
 }
 
 export async function getLoginUrl(): Promise<string> {
-    const response = await http<{ url: string }>({ url: "/v1/login" });
+    const response = await http<{ url: string }>({ url: "/login" });
     return response.url;
 }
 
@@ -72,7 +72,7 @@ export interface LoginResponse {
 
 export async function login(code: string): Promise<LoginResponse> {
     const response = await http<LoginResponse>({
-        url: "/v1/login",
+        url: "/login",
         method: "POST",
         data: { code: code },
     });
