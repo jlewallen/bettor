@@ -55,7 +55,6 @@ snapshots['test_group_chat_hello_and_query 2'] = {
                     'name': 'Lori Singleton',
                     'picture': None
                 },
-                'createdAt': '2021-01-23T08:10:50.657115',
                 'id': '2',
                 'message': 'Hello, there'
             },
@@ -65,7 +64,6 @@ snapshots['test_group_chat_hello_and_query 2'] = {
                     'name': 'Lori Singleton',
                     'picture': None
                 },
-                'createdAt': '2021-01-23T08:10:50.622349',
                 'id': '1',
                 'message': 'Hello, there'
             }

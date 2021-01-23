@@ -101,13 +101,13 @@ async def test_group_chat_hello_and_query(snapshot):
     }"""
         )
     )
+
     snapshot.assert_match(
         await te.execute(
             """
         query {
             groupChat(groupId: 2, page: 0) {
                 id
-                createdAt
                 message
                 author { id name picture }
             }
