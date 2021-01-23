@@ -32,3 +32,11 @@ yarn lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+
+
+### Notes
+
+```
+sudo certbot certonly --webroot -w /home/betting.espial.me/live/public -d betting.espial.me
+```

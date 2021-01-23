@@ -15,6 +15,9 @@ import jsonpickle
 import oauthlib.oauth2
 import requests
 
+from hypercorn.config import Config
+from hypercorn.asyncio import serve
+
 import models
 import db
 import schema as schema_factory
@@ -26,7 +29,7 @@ def get_google_provider_cfg():
     ).json()
 
 
-def create_app():
+def create_app(path=None):
     app = quart.Quart(__name__, static_folder=os.path.abspath("dist"))
     app = quart_cors.cors(app)
 
@@ -37,7 +40,7 @@ def create_app():
     session_key = base64.b64decode(session_key_string)
 
     google_provider_cfg = get_google_provider_cfg()
-    session = db.create(path="sqlite:///bettor.sqlite3")
+    session = db.create(path=path)
     schema = schema_factory.create()
 
     def create_user_from_google_info(
@@ -131,10 +134,34 @@ def create_app():
     return app
 
 
-def main():
-    app = create_app()
+def get_config():
+    path = os.getenv("BETTOR_PATH")
 
-    app.run()
+    return {
+        "path": path if path else "sqlite:///bettor.sqlite3",
+        "prod": os.getenv("BETTOR_PROD") != None,
+    }
+
+
+def main():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[
+            logging.StreamHandler(),
+        ],
+    )
+
+    cfg = get_config()
+
+    app = create_app(path=cfg["path"])
+
+    if cfg["prod"]:
+        config = Config()
+        config.bind = ["0.0.0.0:5000"]
+        asyncio.run(serve(app, config))
+    else:
+        app.run()
 
 
 if __name__ == "__main__":
