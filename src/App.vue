@@ -9,14 +9,22 @@
                 <span class="md-title" v-if="group">{{ group.name }}</span>
                 <span class="md-title" v-else>Bettor</span>
 
-                <div class="md-toolbar-section-end" v-if="false">
-                    <md-button class="md-icon-button">
-                        <md-icon>more_vert</md-icon>
-                    </md-button>
+                <div class="md-toolbar-section-end" v-if="group">
+                    <md-menu md-direction="bottom-start" md-align-trigger>
+                        <md-button class="md-icon-button">
+                            <md-icon>more_vert</md-icon>
+                        </md-button>
+
+                        <md-menu-content>
+                            <md-menu-item>My Item 1</md-menu-item>
+                            <md-menu-item>My Item 2</md-menu-item>
+                            <md-menu-item>My Item 3</md-menu-item>
+                        </md-menu-content>
+                    </md-menu>
                 </div>
             </md-app-toolbar>
 
-            <md-app-drawer :md-active.sync="toolbar" md-persistent="full">
+            <md-app-drawer :md-active.sync="toolbar" md-swipeable>
                 <md-toolbar class="md-transparent" md-elevation="0">Navigation</md-toolbar>
 
                 <md-list>
