@@ -20,3 +20,6 @@ update-test: env
 
 wipe:
 	rm -rf server/snapshots
+
+image:
+	docker build -t jlewallen/bettor .
