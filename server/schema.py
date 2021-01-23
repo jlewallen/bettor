@@ -16,16 +16,25 @@ class User(ActiveSQLAlchemyObjectType):
     class Meta:
         model = models.User
 
+    friends = graphene.List(graphene.NonNull(lambda: User))
+
 
 class Group(ActiveSQLAlchemyObjectType):
     class Meta:
         model = models.Group
+
+    members = graphene.List(graphene.NonNull(lambda: User))
+    all_bets = graphene.List(graphene.NonNull(lambda: Bet))
+    messages = graphene.List(graphene.NonNull(lambda: GroupChat))
 
 
 class Bet(ActiveSQLAlchemyObjectType):
     class Meta:
         model = models.Bet
 
+    positions = graphene.List(graphene.NonNull(lambda: Position))
+    messages = graphene.List(graphene.NonNull(lambda: BetChat))
+    watchers = graphene.List(graphene.NonNull(lambda: User))
     expired = graphene.NonNull(graphene.Boolean)
     involved = graphene.NonNull(graphene.Boolean)
     cancelled = graphene.NonNull(graphene.Boolean)
@@ -60,6 +69,7 @@ class Position(ActiveSQLAlchemyObjectType):
     class Meta:
         model = models.Position
 
+    user_positions = graphene.List(graphene.NonNull(lambda: UserPosition))
     can_take = graphene.NonNull(graphene.Boolean)
     can_cancel = graphene.NonNull(graphene.Boolean)
 

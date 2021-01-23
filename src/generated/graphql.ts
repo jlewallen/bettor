@@ -63,6 +63,7 @@ export type User = {
   deletedAt?: Maybe<Scalars['DateTime']>;
   createdGroups?: Maybe<Array<Maybe<Group>>>;
   groups?: Maybe<Array<Maybe<Group>>>;
+  friends?: Maybe<Array<User>>;
   authoredBets?: Maybe<Array<Maybe<Bet>>>;
   watchedBets?: Maybe<Array<Maybe<Bet>>>;
 };
@@ -78,9 +79,9 @@ export type Group = {
   activityAt: Scalars['DateTime'];
   deletedAt?: Maybe<Scalars['DateTime']>;
   owner?: Maybe<User>;
-  members?: Maybe<Array<Maybe<User>>>;
-  allBets?: Maybe<Array<Maybe<Bet>>>;
-  messages?: Maybe<Array<Maybe<GroupChat>>>;
+  members?: Maybe<Array<User>>;
+  allBets?: Maybe<Array<Bet>>;
+  messages?: Maybe<Array<GroupChat>>;
 };
 
 export type Bet = {
@@ -97,9 +98,9 @@ export type Bet = {
   state: BetState;
   author?: Maybe<User>;
   group?: Maybe<Group>;
-  positions?: Maybe<Array<Maybe<Position>>>;
-  messages?: Maybe<Array<Maybe<BetChat>>>;
-  watchers?: Maybe<Array<Maybe<User>>>;
+  positions?: Maybe<Array<Position>>;
+  messages?: Maybe<Array<BetChat>>;
+  watchers?: Maybe<Array<User>>;
   expired: Scalars['Boolean'];
   involved: Scalars['Boolean'];
   cancelled: Scalars['Boolean'];
@@ -127,7 +128,7 @@ export type Position = {
   minimum: Scalars['Int'];
   maximum: Scalars['Int'];
   bet?: Maybe<Bet>;
-  userPositions?: Maybe<Array<Maybe<UserPosition>>>;
+  userPositions?: Maybe<Array<UserPosition>>;
   canTake: Scalars['Boolean'];
   canCancel: Scalars['Boolean'];
 };
@@ -413,18 +414,18 @@ export type QueriedBetFieldsFragment = (
   ), author?: Maybe<(
     { __typename?: 'User' }
     & UserRefFragment
-  )>, positions?: Maybe<Array<Maybe<(
+  )>, positions?: Maybe<Array<(
     { __typename?: 'Position' }
     & Pick<Position, 'title' | 'canTake' | 'canCancel'>
-    & { userPositions?: Maybe<Array<Maybe<(
+    & { userPositions?: Maybe<Array<(
       { __typename?: 'UserPosition' }
       & Pick<UserPosition, 'createdAt' | 'state'>
       & { user?: Maybe<(
         { __typename?: 'User' }
         & UserRefFragment
       )> }
-    )>>> }
-  )>>> }
+    )>> }
+  )>> }
 );
 
 export type QueriedGroupFieldsFragment = (
@@ -433,13 +434,13 @@ export type QueriedGroupFieldsFragment = (
   & { owner?: Maybe<(
     { __typename?: 'User' }
     & UserRefFragment
-  )>, members?: Maybe<Array<Maybe<(
+  )>, members?: Maybe<Array<(
     { __typename?: 'User' }
     & UserRefFragment
-  )>>>, allBets?: Maybe<Array<Maybe<(
+  )>>, allBets?: Maybe<Array<(
     { __typename?: 'Bet' }
     & QueriedBetFieldsFragment
-  )>>> }
+  )>> }
 );
 
 export type QueryGroupQueryVariables = Exact<{
