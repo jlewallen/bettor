@@ -35,3 +35,7 @@ __pycache__
 *.sqlite3
 
 src/config.ts
+
+/public_key.txt
+/private_key.txt
+*.pem

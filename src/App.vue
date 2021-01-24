@@ -73,7 +73,6 @@ export default Vue.extend({
     },
     async mounted() {
         await this.$store.dispatch(ActionTypes.LOAD_USER);
-        console.log(this.$route);
     },
     computed: {
         chatLayout(): boolean {
@@ -124,7 +123,7 @@ export default Vue.extend({
         // The primary color of your applicatio
         accent: md-get-palette-color(red, A200),
         // The accent or secondary colo
-        theme: dark // This can be dark or ligh,,,,
+        theme: dark // This can be dark or ligh,,,,,,,,
     )
 );
 

@@ -81,3 +81,13 @@ export async function login(code: string): Promise<LoginResponse> {
     });
     return response;
 }
+
+export async function subscribe(data: PushSubscriptionJSON): Promise<LoginResponse> {
+    const response = await http<LoginResponse>({
+        url: "/subscribe",
+        method: "POST",
+        data: data,
+        headers: getAuthHeaders(),
+    });
+    return response;
+}

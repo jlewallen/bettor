@@ -37,7 +37,7 @@ def create_app(path=None, auth_callback_url=None, prod=False, echo=False):
 
     google_client_id = os.environ.get("GOOGLE_CLIENT_ID", None)
     google_client_secret = os.environ.get("GOOGLE_CLIENT_SECRET", None)
-    session_key_string = os.getenv("SESSION_KEY")
+    session_key_string = os.getenv("BETTOR_SESSION_KEY")
 
     session_key = base64.b64decode(session_key_string)
 
@@ -120,6 +120,14 @@ def create_app(path=None, auth_callback_url=None, prod=False, echo=False):
         token = jwt.encode(user, session_key, algorithm="HS256")
         encoded = base64.b64encode(token.encode("utf-8"))
         return {"token": encoded.decode("utf-8"), "user": user}
+
+    @app.route("/v1/subscribe", methods=["POST"])
+    async def subscribe():
+        user = authenticate()
+        body = await quart.request.get_json()
+        user.subscription = json.dumps(body)
+        session.commit()
+        return {"success": True}
 
     @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")

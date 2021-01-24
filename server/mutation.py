@@ -1,6 +1,9 @@
 import logging
 import graphene
 import datetime
+import pywebpush
+import json
+import os
 
 import utils
 import models
@@ -8,6 +11,13 @@ import schema_models as schema
 import db
 
 log = logging.getLogger("bettor")
+
+
+vapid_private_key = os.getenv("BETTOR_VAPID_PRIVATE_KEY")
+if vapid_private_key:
+    log.info("vapid: configured")
+else:
+    log.info("vapid: MISSING")
 
 
 class CreateGroupAttributes:
@@ -159,6 +169,24 @@ class SayGroupChat(graphene.Mutation):
         group.touch()
         message = models.GroupChat(group=group, message=payload.message, author=user)
         session.add(message)
+
+        if vapid_private_key:
+            for member in group.members:
+                if member.subscription:
+                    subscription = json.loads(user.subscription)
+                    try:
+                        log.info("notify: %s" % (user,))
+                        r = pywebpush.webpush(
+                            subscription,
+                            vapid_private_key=vapid_private_key,
+                            vapid_claims={"sub": "mailto:" + user.email},
+                        )
+                        log.info("res: %s" % (r,))
+                    except WebPushException as ex:
+                        log.exception("webpush error")
+        else:
+            log.info("vapid: MISSING")
+
         session.commit()
         return SayGroupChat(message=message, ok=True)
 

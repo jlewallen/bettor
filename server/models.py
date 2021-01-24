@@ -46,6 +46,7 @@ class User(Base):
     name = Column(String, nullable=False)
     email = Column(String, nullable=False)
     picture = Column(String)
+    subscription = Column(String)
     created_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     activity_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     deleted_at = Column(DateTime, nullable=True)
