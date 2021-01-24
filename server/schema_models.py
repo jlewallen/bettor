@@ -1,12 +1,10 @@
 from typing import Union
 
-import logging
 import graphene
 import graphene_sqlalchemy
 
-import models
 
-log = logging.getLogger("bettor")
+import models
 
 
 class ActiveSQLAlchemyObjectType(graphene_sqlalchemy.SQLAlchemyObjectType):
@@ -44,6 +42,8 @@ class Bet(ActiveSQLAlchemyObjectType):
     modifier = graphene.NonNull(User)
     can_take = graphene.NonNull(graphene.Boolean)
     can_cancel = graphene.NonNull(graphene.Boolean)
+    can_dispute = graphene.NonNull(graphene.Boolean)
+    can_pay = graphene.NonNull(graphene.Boolean)
 
     def resolve_expired(self, info):
         return self.is_expired()
@@ -66,6 +66,12 @@ class Bet(ActiveSQLAlchemyObjectType):
     def resolve_can_cancel(self, info):
         return self.can_cancel(info.context["user"])
 
+    def resolve_can_pay(self, info):
+        return self.can_pay(info.context["user"])
+
+    def resolve_can_dispute(self, info):
+        return self.can_dispute(info.context["user"])
+
 
 class Position(ActiveSQLAlchemyObjectType):
     class Meta:
@@ -74,12 +80,20 @@ class Position(ActiveSQLAlchemyObjectType):
     user_positions = graphene.List(graphene.NonNull(lambda: UserPosition))
     can_take = graphene.NonNull(graphene.Boolean)
     can_cancel = graphene.NonNull(graphene.Boolean)
+    can_pay = graphene.NonNull(graphene.Boolean)
+    can_dispute = graphene.NonNull(graphene.Boolean)
 
     def resolve_can_take(self, info):
         return self.can_take(info.context["user"])
 
     def resolve_can_cancel(self, info):
         return self.can_cancel(info.context["user"])
+
+    def resolve_can_pay(self, info):
+        return self.can_pay(info.context["user"])
+
+    def resolve_can_dispute(self, info):
+        return self.can_dispute(info.context["user"])
 
 
 class UserPosition(ActiveSQLAlchemyObjectType):

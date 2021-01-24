@@ -41,6 +41,8 @@ export enum ActionTypes {
     CREATE_BET = "CREATE_BET",
     TAKE_POSITION = "TAKE_POSITION",
     CANCEL_POSITION = "CANCEL_POSITION",
+    PAY_POSITION = "PAY_POSITION",
+    DISPUTE_POSITION = "DISPUTE_POSITION",
     CANCEL_BET = "CANCEL_BET",
     CREATE_GROUP = "CREATE_GROUP",
 }
@@ -65,6 +67,18 @@ export class TakePositionAction {
 
 export class CancelPositionAction {
     type = ActionTypes.CANCEL_POSITION;
+
+    constructor(public readonly betId: ID, public readonly position: string) {}
+}
+
+export class PayPositionAction {
+    type = ActionTypes.PAY_POSITION;
+
+    constructor(public readonly betId: ID, public readonly position: string) {}
+}
+
+export class DisputePositionAction {
+    type = ActionTypes.DISPUTE_POSITION;
 
     constructor(public readonly betId: ID, public readonly position: string) {}
 }
@@ -274,6 +288,26 @@ export default new Vuex.Store({
             const reply = await api.cancelPosition(payload);
             console.log(reply);
             const bet = reply?.cancelPosition?.bet;
+            if (bet && bet.group?.id) {
+                commit(MutationTypes.REFRESH_BET, bet);
+                commit(MutationTypes.REORDER_FEED, { groupId: bet.group.id });
+            }
+        },
+        [ActionTypes.PAY_POSITION]: async ({ commit, dispatch }, payload: TakePositionAction) => {
+            const api = getApi();
+            const reply = await api.payPosition(payload);
+            console.log(reply);
+            const bet = reply?.payPosition?.bet;
+            if (bet && bet.group?.id) {
+                commit(MutationTypes.REFRESH_BET, bet);
+                commit(MutationTypes.REORDER_FEED, { groupId: bet.group.id });
+            }
+        },
+        [ActionTypes.DISPUTE_POSITION]: async ({ commit, dispatch }, payload: TakePositionAction) => {
+            const api = getApi();
+            const reply = await api.disputePosition(payload);
+            console.log(reply);
+            const bet = reply?.disputePosition?.bet;
             if (bet && bet.group?.id) {
                 commit(MutationTypes.REFRESH_BET, bet);
                 commit(MutationTypes.REORDER_FEED, { groupId: bet.group.id });

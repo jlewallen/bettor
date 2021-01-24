@@ -300,10 +300,26 @@ class Bet(Base):
             return self.state != BetState.CANCELLED
         return self.has_position(user)
 
+    def can_dispute(self, user: User) -> bool:
+        if self.is_expired():
+            return False
+        if self.has_position(user):
+            return True
+        return False
+
+    def can_pay(self, user: User) -> bool:
+        if self.is_expired():
+            return False
+        if self.has_position(user):
+            return True
+        return False
+
     def open_positions(self) -> List["Position"]:
         return [p for p in self.positions if p.is_open()]
 
     def check_expired(self):
+        if self.state == BetState.CANCELLED:
+            raise Exception("cancelled")
         if self.is_expired():
             raise Exception("expired")
 
@@ -336,11 +352,19 @@ class Bet(Base):
 
     def cancel(self, user: User):
         self.check_expired()
-        if self.state == BetState.CANCELLED:
-            raise Exception("cancelled")
         self.position_by_user(user).cancel(user)
         if self.author == user:
             self.state = BetState.CANCELLED
+        self.touch()
+
+    def dispute(self, user: User):
+        self.check_expired()
+        self.position_by_user(user).dispute(user)
+        self.touch()
+
+    def pay(self, user: User):
+        self.check_expired()
+        self.position_by_user(user).pay(user)
         self.touch()
 
     def position_by_user(self, user: User) -> "Position":
@@ -384,6 +408,12 @@ class Position(Base):
     def can_cancel(self, user: User) -> bool:
         return user in self.valid_users()
 
+    def can_pay(self, user: User) -> bool:
+        return user in self.valid_users()
+
+    def can_dispute(self, user: User) -> bool:
+        return user in self.valid_users()
+
     def is_open(self) -> bool:
         return len(self.valid_users()) < self.maximum
 
@@ -406,13 +436,23 @@ class Position(Base):
         )
         return True
 
-    def get_user_position(self, user: User) -> "UserPosition":
-        return [up for up in self.user_positions if up.user_id == user.id][0]
-
     def cancel(self, user: User) -> bool:
-        user_position = self.get_user_position(user)
-        user_position.cancel()
+        self.get_user_position(user).cancel()
         return True
+
+    def pay(self, user: User) -> bool:
+        self.get_user_position(user).pay()
+        return True
+
+    def dispute(self, user: User) -> bool:
+        self.get_user_position(user).dispute()
+        return True
+
+    def get_user_position(self, user: User) -> "UserPosition":
+        ups = [up for up in self.user_positions if up.user_id == user.id]
+        if len(ups) == 0:
+            raise Exception("no position")
+        return ups[0]
 
     def __repr__(self):
         return "<Position(id='%s', title='%s')>" % (
@@ -424,7 +464,8 @@ class Position(Base):
 class PositionState(enum.Enum):
     TAKEN = "TAKEN"
     CANCELLED = "CANCELLED"
-    CLAIMED = "CLAIMED"
+    DISPUTED = "DISPUTED"
+    PAID = "PAID"
 
 
 class UserPosition(Base):
@@ -443,10 +484,21 @@ class UserPosition(Base):
     def is_valid(self) -> bool:
         return self.state != PositionState.CANCELLED
 
+    def touch(self):
+        self.activity_at = datetime.datetime.utcnow()
+
+    def dispute(self):
+        self.state = PositionState.DISPUTED
+        self.touch()
+
+    def paid(self):
+        self.state = PositionState.PAID
+        self.touch()
+
     def cancel(self):
         assert self.state == PositionState.TAKEN
         self.state = PositionState.CANCELLED
-        self.activity_at = datetime.datetime.utcnow()
+        self.touch()
 
     def __repr__(self):
         return "<UserPosition(id='%s', user='%s', state='%s')>" % (

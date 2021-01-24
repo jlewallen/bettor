@@ -110,13 +110,15 @@ class PositionPayload(graphene.InputObjectType, PositionAttributes):
     pass
 
 
-class TakePosition(graphene.Mutation):
+class PositionMutation:
     bet = graphene.Field(schema.Bet)
     ok = graphene.Boolean()
 
     class Arguments:
         payload = PositionPayload(required=True)
 
+
+class TakePosition(graphene.Mutation, PositionMutation):
     @staticmethod
     def mutate(self, info, payload):
         session = info.context["session"]
@@ -127,13 +129,7 @@ class TakePosition(graphene.Mutation):
         return TakePosition(bet=bet, ok=True)
 
 
-class CancelPosition(graphene.Mutation):
-    bet = graphene.Field(schema.Bet)
-    ok = graphene.Boolean()
-
-    class Arguments:
-        payload = PositionPayload(required=True)
-
+class CancelPosition(graphene.Mutation, PositionMutation):
     @staticmethod
     def mutate(self, info, payload):
         session = info.context["session"]
@@ -142,6 +138,28 @@ class CancelPosition(graphene.Mutation):
         bet.cancel(user)
         session.commit()
         return CancelPosition(bet=bet, ok=True)
+
+
+class DisputePosition(graphene.Mutation, PositionMutation):
+    @staticmethod
+    def mutate(self, info, payload):
+        session = info.context["session"]
+        user = info.context["user"]
+        bet = session.query(models.Bet).get(payload.bet_id)
+        bet.dispute(user)
+        session.commit()
+        return DisputePosition(bet=bet, ok=True)
+
+
+class PayPosition(graphene.Mutation, PositionMutation):
+    @staticmethod
+    def mutate(self, info, payload):
+        session = info.context["session"]
+        user = info.context["user"]
+        bet = session.query(models.Bet).get(payload.bet_id)
+        bet.pay(user)
+        session.commit()
+        return PayPosition(bet=bet, ok=True)
 
 
 class GroupChatAttributes:
@@ -335,6 +353,8 @@ class Mutation(graphene.ObjectType):
     createExamples = CreateExamples.Field()
     takePosition = TakePosition.Field()
     cancelPosition = CancelPosition.Field()
+    payPosition = PayPosition.Field()
+    disputePosition = DisputePosition.Field()
     sayGroupChat = SayGroupChat.Field()
     sayBetChat = SayBetChat.Field()
     cancelBet = CancelBet.Field()

@@ -58,6 +58,7 @@ export type User = {
   name: Scalars['String'];
   email: Scalars['String'];
   picture?: Maybe<Scalars['String']>;
+  subscription?: Maybe<Scalars['String']>;
   createdAt: Scalars['DateTime'];
   activityAt: Scalars['DateTime'];
   deletedAt?: Maybe<Scalars['DateTime']>;
@@ -94,6 +95,7 @@ export type Bet = {
   createdAt: Scalars['DateTime'];
   activityAt: Scalars['DateTime'];
   expiresAt: Scalars['DateTime'];
+  payoffAt?: Maybe<Scalars['DateTime']>;
   deletedAt?: Maybe<Scalars['DateTime']>;
   state: BetState;
   author?: Maybe<User>;
@@ -108,6 +110,8 @@ export type Bet = {
   modifier: User;
   canTake: Scalars['Boolean'];
   canCancel: Scalars['Boolean'];
+  canDispute: Scalars['Boolean'];
+  canPay: Scalars['Boolean'];
 };
 
 /** An enumeration. */
@@ -131,6 +135,8 @@ export type Position = {
   userPositions?: Maybe<Array<UserPosition>>;
   canTake: Scalars['Boolean'];
   canCancel: Scalars['Boolean'];
+  canPay: Scalars['Boolean'];
+  canDispute: Scalars['Boolean'];
 };
 
 export type UserPosition = {
@@ -139,6 +145,7 @@ export type UserPosition = {
   userId?: Maybe<Scalars['Int']>;
   positionId?: Maybe<Scalars['Int']>;
   createdAt: Scalars['DateTime'];
+  activityAt: Scalars['DateTime'];
   state: PositionState;
   user?: Maybe<User>;
   position?: Maybe<Position>;
@@ -148,7 +155,8 @@ export type UserPosition = {
 export enum PositionState {
   Taken = 'TAKEN',
   Cancelled = 'CANCELLED',
-  Claimed = 'CLAIMED'
+  Disputed = 'DISPUTED',
+  Paid = 'PAID'
 }
 
 export type BetChat = {
@@ -180,6 +188,8 @@ export type Mutation = {
   createExamples?: Maybe<CreateExamples>;
   takePosition?: Maybe<TakePosition>;
   cancelPosition?: Maybe<CancelPosition>;
+  payPosition?: Maybe<PayPosition>;
+  disputePosition?: Maybe<DisputePosition>;
   sayGroupChat?: Maybe<SayGroupChat>;
   sayBetChat?: Maybe<SayBetChat>;
   cancelBet?: Maybe<CancelBet>;
@@ -205,6 +215,16 @@ export type MutationTakePositionArgs = {
 
 
 export type MutationCancelPositionArgs = {
+  payload: PositionPayload;
+};
+
+
+export type MutationPayPositionArgs = {
+  payload: PositionPayload;
+};
+
+
+export type MutationDisputePositionArgs = {
   payload: PositionPayload;
 };
 
@@ -283,6 +303,18 @@ export type PositionPayload = {
 
 export type CancelPosition = {
   __typename?: 'CancelPosition';
+  bet?: Maybe<Bet>;
+  ok?: Maybe<Scalars['Boolean']>;
+};
+
+export type PayPosition = {
+  __typename?: 'PayPosition';
+  bet?: Maybe<Bet>;
+  ok?: Maybe<Scalars['Boolean']>;
+};
+
+export type DisputePosition = {
+  __typename?: 'DisputePosition';
   bet?: Maybe<Bet>;
   ok?: Maybe<Scalars['Boolean']>;
 };
@@ -405,7 +437,7 @@ export type QueryGroupsQuery = (
 
 export type QueriedBetFieldsFragment = (
   { __typename?: 'Bet' }
-  & Pick<Bet, 'id' | 'title' | 'details' | 'createdAt' | 'expiresAt' | 'expired' | 'involved' | 'cancelled' | 'canTake' | 'canCancel' | 'activityAt' | 'state' | 'suggested'>
+  & Pick<Bet, 'id' | 'title' | 'details' | 'createdAt' | 'expiresAt' | 'expired' | 'involved' | 'cancelled' | 'canTake' | 'canCancel' | 'canPay' | 'canDispute' | 'activityAt' | 'state' | 'suggested'>
   & { group?: Maybe<(
     { __typename?: 'Group' }
     & Pick<Group, 'id'>
@@ -417,7 +449,7 @@ export type QueriedBetFieldsFragment = (
     & UserRefFragment
   )>, positions?: Maybe<Array<(
     { __typename?: 'Position' }
-    & Pick<Position, 'title' | 'canTake' | 'canCancel'>
+    & Pick<Position, 'title' | 'canTake' | 'canCancel' | 'canPay' | 'canDispute'>
     & { userPositions?: Maybe<Array<(
       { __typename?: 'UserPosition' }
       & Pick<UserPosition, 'createdAt' | 'state'>
@@ -612,6 +644,42 @@ export type CancelPositionMutation = (
   )> }
 );
 
+export type PayPositionMutationVariables = Exact<{
+  betId: Scalars['ID'];
+  position?: Maybe<Scalars['String']>;
+}>;
+
+
+export type PayPositionMutation = (
+  { __typename?: 'Mutation' }
+  & { payPosition?: Maybe<(
+    { __typename?: 'PayPosition' }
+    & Pick<PayPosition, 'ok'>
+    & { bet?: Maybe<(
+      { __typename?: 'Bet' }
+      & QueriedBetFieldsFragment
+    )> }
+  )> }
+);
+
+export type DisputePositionMutationVariables = Exact<{
+  betId: Scalars['ID'];
+  position?: Maybe<Scalars['String']>;
+}>;
+
+
+export type DisputePositionMutation = (
+  { __typename?: 'Mutation' }
+  & { disputePosition?: Maybe<(
+    { __typename?: 'DisputePosition' }
+    & Pick<DisputePosition, 'ok'>
+    & { bet?: Maybe<(
+      { __typename?: 'Bet' }
+      & QueriedBetFieldsFragment
+    )> }
+  )> }
+);
+
 export type CancelBetMutationVariables = Exact<{
   betId: Scalars['ID'];
 }>;
@@ -702,6 +770,8 @@ export const QueriedBetFieldsFragmentDoc = gql`
   cancelled
   canTake
   canCancel
+  canPay
+  canDispute
   activityAt
   state
   group {
@@ -718,6 +788,8 @@ export const QueriedBetFieldsFragmentDoc = gql`
     title
     canTake
     canCancel
+    canPay
+    canDispute
     userPositions {
       createdAt
       state
@@ -870,6 +942,26 @@ export const CancelPositionDocument = gql`
   }
 }
     ${QueriedBetFieldsFragmentDoc}`;
+export const PayPositionDocument = gql`
+    mutation payPosition($betId: ID!, $position: String) {
+  payPosition(payload: {betId: $betId, position: $position}) {
+    ok
+    bet {
+      ...QueriedBetFields
+    }
+  }
+}
+    ${QueriedBetFieldsFragmentDoc}`;
+export const DisputePositionDocument = gql`
+    mutation disputePosition($betId: ID!, $position: String) {
+  disputePosition(payload: {betId: $betId, position: $position}) {
+    ok
+    bet {
+      ...QueriedBetFields
+    }
+  }
+}
+    ${QueriedBetFieldsFragmentDoc}`;
 export const CancelBetDocument = gql`
     mutation cancelBet($betId: ID!) {
   cancelBet(payload: {betId: $betId}) {
@@ -942,6 +1034,12 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     cancelPosition(variables: CancelPositionMutationVariables, requestHeaders?: Headers): Promise<CancelPositionMutation> {
       return withWrapper(() => client.request<CancelPositionMutation>(print(CancelPositionDocument), variables, requestHeaders));
+    },
+    payPosition(variables: PayPositionMutationVariables, requestHeaders?: Headers): Promise<PayPositionMutation> {
+      return withWrapper(() => client.request<PayPositionMutation>(print(PayPositionDocument), variables, requestHeaders));
+    },
+    disputePosition(variables: DisputePositionMutationVariables, requestHeaders?: Headers): Promise<DisputePositionMutation> {
+      return withWrapper(() => client.request<DisputePositionMutation>(print(DisputePositionDocument), variables, requestHeaders));
     },
     cancelBet(variables: CancelBetMutationVariables, requestHeaders?: Headers): Promise<CancelBetMutation> {
       return withWrapper(() => client.request<CancelBetMutation>(print(CancelBetDocument), variables, requestHeaders));

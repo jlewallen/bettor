@@ -14,7 +14,23 @@
             md-content="Are you sure you want to take this bet?"
             md-confirm-text="Take"
             md-cancel-text="No way"
-            @md-confirm="onTake(taking)"
+            @md-confirm="onTake(position)"
+        />
+        <md-dialog-confirm
+            :md-active.sync="dispute"
+            md-title="Dispute?"
+            md-content="Dispute this bet?"
+            md-confirm-text="Dispute"
+            md-cancel-text="It's good"
+            @md-confirm="onDispute(position)"
+        />
+        <md-dialog-confirm
+            :md-active.sync="pay"
+            md-title="Paid?"
+            md-content="Is this bet paid?"
+            md-confirm-text="Paid"
+            md-cancel-text="Not yet"
+            @md-confirm="onPay(position)"
         />
         <UserPhoto :user="entry.bet.modifier" class="feed-photo" />
         <div class="feed-body">
@@ -34,11 +50,13 @@
                             <div>
                                 <md-button @click="cancel = true" v-if="entry.bet.canCancel">Cancel</md-button>
                                 <md-button
-                                    @click="(take = true), (taking = entry.bet.suggested)"
+                                    @click="(take = true), (position = entry.bet.suggested)"
                                     v-if="entry.bet.canTake && entry.bet.suggested"
                                 >
                                     Take
                                 </md-button>
+                                <md-button @click="pay = true" v-if="entry.bet.canPay">Paid</md-button>
+                                <md-button @click="dispute = true" v-if="false && entry.bet.canDispute">Dispute</md-button>
                             </div>
 
                             <md-card-expand-trigger>
@@ -59,18 +77,28 @@
                                         <div class="position">
                                             <h3>{{ position.title }}</h3>
                                             <md-button
-                                                @click="(take = true), (taking = position.title)"
-                                                v-if="entry.bet.canTake && position.canTake"
-                                                class="md-primary"
-                                            >
-                                                Take
-                                            </md-button>
-                                            <md-button
                                                 @click="cancel = true"
                                                 v-if="entry.bet.canCancel && position.canCancel"
                                                 class="md-primary"
                                             >
                                                 Cancel
+                                            </md-button>
+                                            <md-button
+                                                @click="(take = true), (position = position.title)"
+                                                v-if="entry.bet.canTake && position.canTake"
+                                                class="md-primary"
+                                            >
+                                                Take
+                                            </md-button>
+                                            <md-button @click="pay = true" v-if="entry.bet.canPay && position.canPay" class="md-primary">
+                                                Paid
+                                            </md-button>
+                                            <md-button
+                                                @click="dispute = true"
+                                                v-if="entry.bet.canDispute && position.canDispute"
+                                                class="md-primary"
+                                            >
+                                                Dispute
                                             </md-button>
                                         </div>
                                         <div
@@ -96,7 +124,15 @@
 import Vue, { PropType } from "vue";
 import UserPhoto from "./UserPhoto.vue";
 import TinyAvatar from "./TinyAvatar.vue";
-import { BetState, PositionState, BetEntry, TakePositionAction, CancelPositionAction } from "@/store";
+import {
+    BetState,
+    PositionState,
+    BetEntry,
+    TakePositionAction,
+    CancelPositionAction,
+    PayPositionAction,
+    DisputePositionAction,
+} from "@/store";
 import moment from "moment";
 
 export default Vue.extend({
@@ -114,12 +150,16 @@ export default Vue.extend({
     data(): {
         cancel: boolean;
         take: boolean;
-        taking: string;
+        pay: boolean;
+        dispute: boolean;
+        position: string;
     } {
         return {
             cancel: false,
             take: false,
-            taking: "*",
+            pay: false,
+            dispute: false,
+            position: "*",
         };
     },
     computed: {
@@ -166,6 +206,12 @@ export default Vue.extend({
         },
         async onTake(position: string): Promise<void> {
             await this.$store.dispatch(new TakePositionAction(this.entry.bet.id, position));
+        },
+        async onPay(position: string): Promise<void> {
+            await this.$store.dispatch(new PayPositionAction(this.entry.bet.id, position));
+        },
+        async onDispute(position: string): Promise<void> {
+            await this.$store.dispatch(new DisputePositionAction(this.entry.bet.id, position));
         },
         async onCancel(): Promise<void> {
             await this.$store.dispatch(new CancelPositionAction(this.entry.bet.id, "*"));
@@ -240,6 +286,7 @@ export default Vue.extend({
     .position {
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
     }
 }
 </style>

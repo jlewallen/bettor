@@ -32,7 +32,28 @@ async def test_create_group(snapshot):
 async def test_query_groups(snapshot):
     te = testing.TestEnv()
     snapshot.assert_match(
-        await te.execute(
+        reply := await te.execute(
+            """
+    mutation {
+        createBet(payload: {
+            groupId: "%s",
+            title: "New bet!",
+            details: "No details.",
+            expiresIn: 60,
+            minimumTakers: 0,
+            maximumTakers: 3 }) {
+            bet {
+                id
+            }
+            ok
+        }
+    }"""
+            % (te.group.id,)
+        )
+    )
+
+    snapshot.assert_match(
+        reply := await te.execute(
             """
     query {
         groups {
@@ -41,8 +62,11 @@ async def test_query_groups(snapshot):
                 id
                 title
                 details
-                createdAt
                 expiresAt
+                canTake
+                canCancel
+                canPay
+                canDispute
                 state
                 expired
                 author {
@@ -56,9 +80,12 @@ async def test_query_groups(snapshot):
                 positions {
                     id
                     title
+                    canTake
+                    canCancel
+                    canPay
+                    canDispute
                     userPositions {
-                    user { id name email }
-                        createdAt
+                        user { id name email }
                         state
                     }
                 }
