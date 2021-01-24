@@ -9,19 +9,21 @@ register(`${process.env.BASE_URL}service-worker.js`, {
     ready(registration) {
         console.log("sw: ready, for more details, visit https://goo.gl/AFskqB");
 
-        const options = {
-            userVisibleOnly: true,
-            applicationServerKey: Config.serverKey,
-        };
+        if (Config.serverKey) {
+            const options = {
+                userVisibleOnly: true,
+                applicationServerKey: Config.serverKey,
+            };
 
-        registration.pushManager.subscribe(options).then(
-            async (pushSubscription) => {
-                await subscribe(pushSubscription.toJSON());
-            },
-            (error) => {
-                console.error("subscribe error:", error);
-            }
-        );
+            registration.pushManager.subscribe(options).then(
+                async (pushSubscription) => {
+                    await subscribe(pushSubscription.toJSON());
+                },
+                (error) => {
+                    console.error("subscribe error:", error);
+                }
+            );
+        }
 
         const channel = new BroadcastChannel("sw-messages");
         channel.addEventListener("message", (ev) => {
