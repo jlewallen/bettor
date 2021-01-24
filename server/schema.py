@@ -16,5 +16,6 @@ def create():
             schema.UserPosition,
             schema.GroupChat,
             schema.BetChat,
+            schema.Action,
         ],
     )

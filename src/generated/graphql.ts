@@ -112,6 +112,7 @@ export type Bet = {
   canCancel: Scalars['Boolean'];
   canDispute: Scalars['Boolean'];
   canPay: Scalars['Boolean'];
+  action: Action;
 };
 
 /** An enumeration. */
@@ -168,6 +169,11 @@ export type BetChat = {
   message: Scalars['String'];
   bet?: Maybe<Bet>;
   author?: Maybe<User>;
+};
+
+export type Action = {
+  __typename?: 'Action';
+  name?: Maybe<Scalars['String']>;
 };
 
 export type GroupChat = {

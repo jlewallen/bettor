@@ -109,8 +109,8 @@ snapshots['test_query_groups 2'] = {
                             'name': 'Lori Singleton'
                         },
                         'canCancel': True,
-                        'canDispute': True,
-                        'canPay': True,
+                        'canDispute': False,
+                        'canPay': False,
                         'canTake': False,
                         'details': 'New bet!',
                         'expired': False,

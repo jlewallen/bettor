@@ -44,6 +44,7 @@ class Bet(ActiveSQLAlchemyObjectType):
     can_cancel = graphene.NonNull(graphene.Boolean)
     can_dispute = graphene.NonNull(graphene.Boolean)
     can_pay = graphene.NonNull(graphene.Boolean)
+    action = graphene.NonNull(lambda: Action)
 
     def resolve_expired(self, info):
         return self.is_expired()
@@ -109,6 +110,10 @@ class GroupChat(ActiveSQLAlchemyObjectType):
 class BetChat(ActiveSQLAlchemyObjectType):
     class Meta:
         model = models.BetChat
+
+
+class Action(graphene.ObjectType):
+    name = graphene.String()
 
 
 class Query(graphene.ObjectType):

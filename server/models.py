@@ -167,6 +167,13 @@ class BetChat(Base):
     __mapper_args__ = {"order_by": created_at.desc()}
 
 
+class PositionState(enum.Enum):
+    TAKEN = "TAKEN"
+    CANCELLED = "CANCELLED"
+    DISPUTED = "DISPUTED"
+    PAID = "PAID"
+
+
 class Action:
     pass
 
@@ -180,6 +187,14 @@ class TakeAction(Action):
 
 
 class CancelAction(Action):
+    pass
+
+
+class PaidAction(Action):
+    pass
+
+
+class DisputedAction(Action):
     pass
 
 
@@ -257,6 +272,10 @@ class Bet(Base):
             return CreatedAction()
         if ups[0].state == PositionState.CANCELLED:
             return CancelAction()
+        if ups[0].state == PositionState.PAID:
+            return PaidAction()
+        if ups[0].state == PositionState.DISPUTED:
+            return DisputedAction()
         return TakeAction()
 
     def is_cancelled(self) -> bool:
@@ -284,6 +303,16 @@ class Bet(Base):
             reverse=True,
         )
 
+    def get_positions_by_state(self, state: PositionState) -> List["UserPosition"]:
+        selected = []
+        for up in self.user_positions():
+            if up.state == state:
+                selected.append(up)
+        return selected
+
+    def any_positions_with_state(self, state: PositionState) -> bool:
+        return len(self.get_positions_by_state(state)) > 0
+
     def can_take(self, user: User) -> bool:
         if self.is_expired():
             return False
@@ -304,14 +333,15 @@ class Bet(Base):
         if self.is_expired():
             return False
         if self.has_position(user):
-            return True
+            return self.any_positions_with_state(PositionState.PAID)
         return False
 
     def can_pay(self, user: User) -> bool:
         if self.is_expired():
             return False
         if self.has_position(user):
-            return True
+            if len(self.users_with_positions()) > 1:
+                return True
         return False
 
     def open_positions(self) -> List["Position"]:
@@ -461,13 +491,6 @@ class Position(Base):
         )
 
 
-class PositionState(enum.Enum):
-    TAKEN = "TAKEN"
-    CANCELLED = "CANCELLED"
-    DISPUTED = "DISPUTED"
-    PAID = "PAID"
-
-
 class UserPosition(Base):
     __tablename__ = "user_positions"
 
@@ -491,7 +514,7 @@ class UserPosition(Base):
         self.state = PositionState.DISPUTED
         self.touch()
 
-    def paid(self):
+    def pay(self):
         self.state = PositionState.PAID
         self.touch()
 

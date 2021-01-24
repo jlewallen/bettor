@@ -163,3 +163,6 @@ async def test_bet_last_action(snapshot):
 
     bet.cancel(stephen)
     assert isinstance(bet.action(), models.CancelAction)
+
+    bet.pay(carla)
+    assert isinstance(bet.action(), models.PaidAction)
