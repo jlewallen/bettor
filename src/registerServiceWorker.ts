@@ -13,6 +13,7 @@ register(`${process.env.BASE_URL}service-worker.js`, {
             userVisibleOnly: true,
             applicationServerKey: Config.serverKey,
         };
+
         registration.pushManager.subscribe(options).then(
             async (pushSubscription) => {
                 await subscribe(pushSubscription.toJSON());
@@ -21,6 +22,11 @@ register(`${process.env.BASE_URL}service-worker.js`, {
                 console.error("subscribe error:", error);
             }
         );
+
+        const channel = new BroadcastChannel("sw-messages");
+        channel.addEventListener("message", (ev) => {
+            console.log("sw: received", ev.data);
+        });
     },
     registered(registration) {
         console.log("sw: registered");

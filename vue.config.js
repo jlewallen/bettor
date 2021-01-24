@@ -4,8 +4,10 @@ module.exports = {
         // https: true,
     },
     pwa: {
+        workboxPluginMode: "InjectManifest",
         workboxOptions: {
-            importScripts: ["src/service-worker.ts"],
+            swSrc: "src/service-worker.js",
+            exclude: [/\.map$/, /manifest\.json$/],
         },
     },
 };
