@@ -167,6 +167,22 @@ class BetChat(Base):
     __mapper_args__ = {"order_by": created_at.desc()}
 
 
+class Action:
+    pass
+
+
+class CreatedAction(Action):
+    pass
+
+
+class TakeAction(Action):
+    pass
+
+
+class CancelAction(Action):
+    pass
+
+
 class Bet(Base):
     __tablename__ = "bets"
 
@@ -178,6 +194,7 @@ class Bet(Base):
     created_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     activity_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     expires_at = Column(DateTime, nullable=False)
+    payoff_at = Column(DateTime, nullable=True)
     deleted_at = Column(DateTime, nullable=True)
     state = Column(Enum(BetState), nullable=False, default=BetState.OPEN)
 
@@ -234,6 +251,14 @@ class Bet(Base):
             **kwargs
         )
 
+    def action(self) -> Action:
+        ups = self.user_positions()
+        if len(ups) == 1:
+            return CreatedAction()
+        if ups[0].state == PositionState.CANCELLED:
+            return CancelAction()
+        return TakeAction()
+
     def is_cancelled(self) -> bool:
         return self.state == BetState.CANCELLED
 
@@ -250,7 +275,14 @@ class Bet(Base):
         return self.author
 
     def user_positions(self) -> List["UserPosition"]:
-        return flatten([p.user_positions for p in self.positions])
+        all_positions = flatten([p.user_positions for p in self.positions])
+        return sorted(
+            all_positions,
+            key=lambda e: e.activity_at
+            if e.activity_at
+            else datetime.datetime.utcnow(),
+            reverse=True,
+        )
 
     def can_take(self, user: User) -> bool:
         if self.is_expired():
@@ -365,7 +397,13 @@ class Position(Base):
         return user in self.valid_users()
 
     def take(self, user: User) -> bool:
-        self.user_positions.append(UserPosition(position=self, user=user))
+        self.user_positions.append(
+            UserPosition(
+                user=user,
+                state=PositionState.TAKEN,
+                activity_at=datetime.datetime.utcnow(),
+            )
+        )
         return True
 
     def get_user_position(self, user: User) -> "UserPosition":
@@ -396,6 +434,7 @@ class UserPosition(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     position_id = Column(Integer, ForeignKey("positions.id"))
     created_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    activity_at = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     state = Column(Enum(PositionState), nullable=False, default=PositionState.TAKEN)
 
     user = relationship("User")
@@ -407,10 +446,12 @@ class UserPosition(Base):
     def cancel(self):
         assert self.state == PositionState.TAKEN
         self.state = PositionState.CANCELLED
+        self.activity_at = datetime.datetime.utcnow()
 
     def __repr__(self):
-        return "<UserPosition(id='%s', state='%s')>" % (
+        return "<UserPosition(id='%s', user='%s', state='%s')>" % (
             self.id,
+            self.user,
             self.state,
         )
 

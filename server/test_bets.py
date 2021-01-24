@@ -1,7 +1,12 @@
 import logging
 import pytest
 import testing
+import datetime
 import freezegun
+
+import models
+
+log = logging.getLogger("bettor")
 
 
 @pytest.mark.asyncio
@@ -134,3 +139,27 @@ async def test_say_bet(snapshot):
             % (bet_id,)
         )
     )
+
+
+@pytest.mark.asyncio
+async def test_bet_last_action(snapshot):
+    jacob = models.User(name="Jacob")
+    stephen = models.User(name="Stephen")
+    carla = models.User(name="Carla")
+    group = models.Group(name="Group", members=[jacob, stephen, carla])
+    bet = models.Bet.arbitrary(
+        title="Bet",
+        author=jacob,
+        group=group,
+        expires_at=datetime.datetime.utcnow() + datetime.timedelta(seconds=60),
+    )
+    assert isinstance(bet.action(), models.CreatedAction)
+
+    bet.take(stephen, position="Takers")
+    assert isinstance(bet.action(), models.TakeAction)
+
+    bet.take(carla, position="Takers")
+    assert isinstance(bet.action(), models.TakeAction)
+
+    bet.cancel(stephen)
+    assert isinstance(bet.action(), models.CancelAction)
