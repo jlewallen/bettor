@@ -166,3 +166,60 @@ async def test_bet_last_action(snapshot):
 
     bet.pay(carla)
     assert isinstance(bet.action(), models.PaidAction)
+
+
+@pytest.mark.asyncio
+async def test_bet_dispute(snapshot):
+    jacob = models.User(name="Jacob")
+    stephen = models.User(name="Stephen")
+    carla = models.User(name="Carla")
+    group = models.Group(name="Group", members=[jacob, stephen, carla])
+    bet = models.Bet.arbitrary(
+        title="Bet",
+        author=jacob,
+        group=group,
+        expires_at=datetime.datetime.utcnow() + datetime.timedelta(seconds=60),
+    )
+    assert isinstance(bet.action(), models.CreatedAction)
+
+    bet.take(stephen, position="Takers")
+    assert isinstance(bet.action(), models.TakeAction)
+
+    bet.take(carla, position="Takers")
+    assert isinstance(bet.action(), models.TakeAction)
+
+    bet.dispute(carla)
+    assert isinstance(bet.action(), models.DisputedAction)
+
+    assert bet.state == models.BetState.DISPUTED
+
+
+@pytest.mark.asyncio
+async def test_bet_paid(snapshot):
+    jacob = models.User(name="Jacob")
+    stephen = models.User(name="Stephen")
+    carla = models.User(name="Carla")
+    group = models.Group(name="Group", members=[jacob, stephen, carla])
+    bet = models.Bet.arbitrary(
+        title="Bet",
+        author=jacob,
+        group=group,
+        expires_at=datetime.datetime.utcnow() + datetime.timedelta(seconds=60),
+    )
+    assert isinstance(bet.action(), models.CreatedAction)
+
+    bet.take(stephen, position="Takers")
+    assert isinstance(bet.action(), models.TakeAction)
+
+    bet.take(carla, position="Takers")
+    assert isinstance(bet.action(), models.TakeAction)
+
+    bet.pay(carla)
+    assert isinstance(bet.action(), models.PaidAction)
+
+    assert bet.state == models.BetState.COLLECTING
+
+    bet.pay(stephen)
+    assert isinstance(bet.action(), models.PaidAction)
+
+    assert bet.state == models.BetState.PAID

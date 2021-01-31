@@ -132,8 +132,8 @@ class BetState(enum.Enum):
     OPEN = "OPEN"
     EXPIRED = "EXPIRED"
     CANCELLED = "CANCELLED"
-    CLAIMED = "CLAIMED"
     DISPUTED = "DISPUTED"
+    COLLECTING = "COLLECTING"
     PAID = "PAID"
 
 
@@ -390,12 +390,36 @@ class Bet(Base):
     def dispute(self, user: User):
         self.check_expired()
         self.position_by_user(user).dispute(user)
+        self.update_state()
         self.touch()
 
     def pay(self, user: User):
         self.check_expired()
         self.position_by_user(user).pay(user)
+        self.update_state()
         self.touch()
+
+    def update_state(self):
+        if self.any_positions_with_state(PositionState.DISPUTED):
+            self.state = BetState.DISPUTED
+            log.info("%s = disputed" % (self,))
+            return
+
+        n_taken = len(self.get_positions_by_state(PositionState.TAKEN))
+        n_paid = len(self.get_positions_by_state(PositionState.PAID))
+
+        fully_paid_positions = [p for p in self.positions if p.fully_paid()]
+        if len(fully_paid_positions) > 0:
+            log.info("%s = paid" % (self,))
+            self.state = BetState.PAID
+            return
+
+        if n_paid > 0:
+            log.info("%s = collecting" % (self,))
+            self.state = BetState.COLLECTING
+            return
+
+        log.info("%s = %s" % (self, self.state))
 
     def position_by_user(self, user: User) -> "Position":
         found = [up for up in self.positions if up.has_user(user)]
@@ -431,6 +455,20 @@ class Position(Base):
 
     bet = relationship("Bet", back_populates="positions")
     user_positions = relationship("UserPosition")
+
+    def fully_paid(self) -> bool:
+        npositions = len([p for p in self.user_positions if p.is_valid()])
+        npaid = len(
+            [
+                p
+                for p in self.user_positions
+                if p.is_valid() and p.state == PositionState.PAID
+            ]
+        )
+        log.info(
+            "fully-paid %s" % ([self.title, npositions, npaid, self.user_positions])
+        )
+        return npositions == npaid
 
     def can_take(self, user: User) -> bool:
         return user not in self.valid_users()
@@ -479,7 +517,7 @@ class Position(Base):
         return True
 
     def get_user_position(self, user: User) -> "UserPosition":
-        ups = [up for up in self.user_positions if up.user_id == user.id]
+        ups = [up for up in self.user_positions if up.user == user]
         if len(ups) == 0:
             raise Exception("no position")
         return ups[0]
@@ -515,6 +553,7 @@ class UserPosition(Base):
         self.touch()
 
     def pay(self):
+        log.info("%s = PAID" % (self,))
         self.state = PositionState.PAID
         self.touch()
 

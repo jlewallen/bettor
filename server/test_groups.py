@@ -4,6 +4,9 @@ import testing
 import freezegun
 
 
+import models
+
+
 @pytest.mark.asyncio
 @freezegun.freeze_time("2012-01-14")
 async def test_create_group(snapshot):
